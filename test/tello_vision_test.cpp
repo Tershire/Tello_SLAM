@@ -18,8 +18,6 @@
 
 // using namespace tello_slam;
 
-void vision_task(cv::VideoCapture cap, cv::Mat frame);
-
 
 int main(int argc, char **argv)
 {
@@ -33,7 +31,6 @@ int main(int argc, char **argv)
     }
 
     tello.enable_video_stream();
-    // std::thread vision_thread(vision_task, cap, frame);
 
     for (;;)
     {
@@ -46,31 +43,6 @@ int main(int argc, char **argv)
             break;
         }
     }
-
-    // tello.takeoff();
-
-    // do something, fly around
-
-    // tello.land();
-
-    // vision_thread.join();
 
     return 0;
 }
-
-// ============================================================================
-void vision_task(cv::VideoCapture cap, cv::Mat frame)
-{
-    for (;;)
-    {
-        cap >> frame;
-        if (!frame.empty())
-        {
-            cv::imshow("Tello View", frame);
-        }
-        if (cv::waitKey(1) == 27) {
-            break;
-        }
-    }
-}
-
