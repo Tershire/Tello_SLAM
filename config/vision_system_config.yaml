@@ -5,6 +5,10 @@
 # // TELLO SLAM PROJECT  //
 # /////////////////////////
 
+# Mode ////////////////////////////////////////////////////////////////////////
+# test, mission
+mode: test
+
 # Input ///////////////////////////////////////////////////////////////////////
 # usb, video
 input_mode: usb
@@ -12,11 +16,21 @@ input_mode: usb
 # USB Camera
 USB_camera_ID: 0
 
+# Setting
+setting_file_path: ./config/sensor_setting.yaml
+
 # Video
 video_file_path: /media/tershire/Samsung_T3/VIDEO/ionmav/20230807_release_test.mp4
 
+# image size
+mono_camera_scale_factor: 0.5
+
 # Output //////////////////////////////////////////////////////////////////////
 resize_scale_factor: 0.75
+
+# System //////////////////////////////////////////////////////////////////////
+# which camera type is used for the mono camera: usb, raspberry
+mono_camera_type: usb
 
 # Aruco Detector //////////////////////////////////////////////////////////////
 predifined_dictionary_name: DICT_5X5_50

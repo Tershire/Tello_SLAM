@@ -36,13 +36,11 @@ Setting::Setting(const std::string& setting_file_path)
         std::cout << "Loading settings from " << setting_file_path << std::endl;
     }
 
-    // set raspberry camera
     read_and_set_usb_camera();
 
     read_and_set_raspberry_camera();
 
     read_and_set_color_imager();
-    // read_and_set_depth_imagers(2);
 }
 
 // private XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

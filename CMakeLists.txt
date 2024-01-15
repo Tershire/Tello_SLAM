@@ -18,14 +18,24 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 # Eigen
 include_directories("/usr/include/eigen3")
 
+# Sophus
+find_package(Sophus REQUIRED)
+include_directories(${Sophus_INCLUDE_DIRS})
+
+add_definitions("-D SOPHUS_USE_BASIC_LOGGING")
+
 # 
 set(THIRD_PARTY_LIBS
-    ${OpenCV_LIBS})
+    ${OpenCV_LIBS}
+    ${Sophus_LIBRARIES})
 
 # #############################################################################
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/include/camera)
 include_directories(${PROJECT_SOURCE_DIR}/include/marker)
 include_directories(${PROJECT_SOURCE_DIR}/include/port)
+include_directories(${PROJECT_SOURCE_DIR}/include/toolbox)
 add_subdirectory(src)
 # add_subdirectory(app)
+add_subdirectory(test)
+
