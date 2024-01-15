@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+
+# cmake
+*cmake-build-*
+*.idea
+**build**
+
+# config
+*configuration.yaml
+
