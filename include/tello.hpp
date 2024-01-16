@@ -758,7 +758,6 @@ public:
 	std::string get_serial_number() { return get_str("sn?"); }
 
 
-
 	// === Mission Pad Commands ===
 	MissionPadAPI missionPadAPI;
 

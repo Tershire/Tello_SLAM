@@ -33,19 +33,17 @@ int main(int argc, char **argv)
     }
 
     tello.enable_video_stream();
-    // std::thread vision_thread(vision_task, cap, frame);
+    std::thread vision_thread(vision_task, cap, frame);
 
+    std::cout << "TEST" << std::endl;
     for (;;)
     {
-        cap >> frame;
-        if (!frame.empty())
-        {
-            cv::imshow("Tello View", frame);
-        }
+        // std::cout << "/";
         if (cv::waitKey(1) == 27) {
             break;
         }
     }
+    std::cout << std::endl;
 
     // tello.takeoff();
 

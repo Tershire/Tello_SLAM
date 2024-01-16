@@ -23,6 +23,15 @@ using namespace tello_slam;
 
 int main(int argc, char **argv)
 {
+    Tello tello;
+    if (!tello.connect()) 
+    {
+        return -1;
+    }
+
+    tello.enable_video_stream();
+
+    
     std::string configuration_file_path = "./config/vision_system_config.yaml";
     
     System::Ptr vision_system = std::make_shared<System>(configuration_file_path);    

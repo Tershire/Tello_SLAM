@@ -66,6 +66,8 @@ ArUco_Detector::ArUco_Detector(const int& target_id,
         input_mode_ = Input_Mode::USB;
     else if (input_mode == "video")
         input_mode_ = Input_Mode::VIDEO;
+    else if (input_mode == "tello")
+        input_mode_ = Input_Mode::TELLO;
     else if (input_mode == "raspberry")
         input_mode_ = Input_Mode::RASPBERRY;
     else if (input_mode == "realsense")
@@ -98,12 +100,17 @@ bool ArUco_Detector::run()
             cap = cv::VideoCapture(Config::read<std::string>("video_file_path"));
             break;
 
+        case TELLO:
+            cap = cv::VideoCapture(Config::read<std::string>("tello_video_stream"), cv::CAP_FFMPEG);
+            break;
+
         case RASPBERRY:
             cap = cv::VideoCapture(Config::read<std::string>("raspberry_pipeline"));    
     }
 
     if (input_mode_ == USB ||
         input_mode_ == VIDEO ||
+        input_mode_ == TELLO ||
         input_mode_ == RASPBERRY)
     {
         // check capture
@@ -157,6 +164,7 @@ bool ArUco_Detector::run()
         // load frame /////////////////////////////////////////////////////////
         if (input_mode_ == USB ||
             input_mode_ == VIDEO ||
+            input_mode_ == TELLO ||
             input_mode_ == RASPBERRY)
         {
             cap >> image;

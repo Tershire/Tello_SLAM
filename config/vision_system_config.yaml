@@ -10,8 +10,8 @@
 mode: test
 
 # Input ///////////////////////////////////////////////////////////////////////
-# usb, video
-input_mode: usb
+# usb, video, tello
+input_mode: tello
 
 # USB Camera
 USB_camera_ID: 0
@@ -21,6 +21,9 @@ setting_file_path: ./config/sensor_setting.yaml
 
 # Video
 video_file_path: /media/tershire/Samsung_T3/VIDEO/ionmav/20230807_release_test.mp4
+
+# Tello
+tello_video_stream: "udp://0.0.0.0:11111"
 
 # image size
 mono_camera_scale_factor: 0.5

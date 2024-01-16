@@ -39,6 +39,7 @@ public:
     {
         USB,
         VIDEO,
+        TELLO,
         RASPBERRY,
         REALSENSE
     };
