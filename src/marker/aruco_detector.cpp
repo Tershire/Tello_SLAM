@@ -260,10 +260,11 @@ bool ArUco_Detector::run()
                 else
                 {
                     is_pose_ok_ = false;
-                    std::cout << "XXXXXXX <!!!> Pose NOT Good! <!!!> XXXXXXX" << std::endl;
+                    if (verbose_)
+                        std::cout << "XXXXXXX <!!!> Pose NOT Good! <!!!> XXXXXXX" << std::endl;
                 }
-
-                std::cout << "pose error: " << pose_error << std::endl;  
+                if (verbose_)
+                    std::cout << "pose error: " << pose_error << std::endl;  
             }
         }
 
@@ -292,7 +293,8 @@ bool ArUco_Detector::run()
             cv::drawFrameAxes(image_out, cameraMatrix_, distCoeffs_, rvec, tvec, 0.1, 2);
         }
 
-        std::cout << "T_cm:\n" << T_cm_.matrix() << std::endl; 
+        if (verbose_)
+            std::cout << "T_cm:\n" << T_cm_.matrix() << std::endl; 
 
         // show ===============================================================
         // resize

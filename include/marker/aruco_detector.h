@@ -1,11 +1,11 @@
-// aruco_tracker.h
+// aruco_detector.h
 
-////////////////////////////
-// IONLAB >< ISAE-SUPAERO //
-// DRONE COMPETITION TEAM //
-////////////////////////////
+/////////////////////////
+// IONLAB ISAE-SUPAERO //
+// TELLO SLAM PROJECT  //
+/////////////////////////
 
-// 2023 AUG 12
+// 2024 JAN 15
 // Wonhee LEE
 
 // reference:
@@ -47,6 +47,8 @@ public:
     // member data ////////////////////////////////////////////////////////////
     int target_id_;
 
+    bool verbose_;
+
     // interface ==============================================================
     // pthread_mutex_t* t_cm_lock_;
     // double* t_cm_out_[3];
@@ -64,6 +66,7 @@ public:
 
     // setter =================================================================
     void set_target_id(const int& target_id) {target_id_ = target_id;}
+    void set_verbose(const bool& verbose) {verbose_ = verbose;}
 
     // port -------------------------------------------------------------------
     void set_input_mode(const Input_Mode& input_mode) {input_mode_ = input_mode;}

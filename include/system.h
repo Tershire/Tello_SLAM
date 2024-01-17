@@ -42,6 +42,9 @@ public:
     // mode ===================================================================
     Mode mode_;
 
+    // verbosity ==============================================================
+    bool verbose_;
+
     // constructor & destructor ///////////////////////////////////////////////
     System(const std::string& configuration_file_path);
 

@@ -24,14 +24,20 @@ include_directories(${Sophus_INCLUDE_DIRS})
 
 add_definitions("-D SOPHUS_USE_BASIC_LOGGING")
 
+# pangolin
+find_package(Pangolin REQUIRED)
+include_directories(${Pangolin_INCLUDE_DIRS})
+
 # 
 set(THIRD_PARTY_LIBS
     ${OpenCV_LIBS}
-    ${Sophus_LIBRARIES})
+    ${Sophus_LIBRARIES}
+    ${Pangolin_LIBRARIES})
 
 # #############################################################################
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/include/camera)
+include_directories(${PROJECT_SOURCE_DIR}/include/imu)
 include_directories(${PROJECT_SOURCE_DIR}/include/marker)
 include_directories(${PROJECT_SOURCE_DIR}/include/port)
 include_directories(${PROJECT_SOURCE_DIR}/include/toolbox)

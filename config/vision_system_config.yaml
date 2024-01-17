@@ -9,12 +9,14 @@
 # test, mission
 mode: test
 
+verbose: 0
+
 # Input ///////////////////////////////////////////////////////////////////////
 # usb, video, tello
 input_mode: tello
 
 # USB Camera
-USB_camera_ID: 0
+USB_camera_ID: 2
 
 # Setting
 setting_file_path: ./config/sensor_setting.yaml
@@ -26,7 +28,7 @@ video_file_path: /media/tershire/Samsung_T3/VIDEO/ionmav/20230807_release_test.m
 tello_video_stream: "udp://0.0.0.0:11111"
 
 # image size
-mono_camera_scale_factor: 0.5
+mono_camera_scale_factor: 1.0
 
 # Output //////////////////////////////////////////////////////////////////////
 resize_scale_factor: 0.75
@@ -38,3 +40,7 @@ mono_camera_type: usb
 # Aruco Detector //////////////////////////////////////////////////////////////
 predifined_dictionary_name: DICT_5X5_50
 marker_length: 14.5E-2
+
+# Supervisor //////////////////////////////////////////////////////////////////
+# motion log __________________________________________________________________
+motion_log_on: 1 # 1 for true, 0 for false (if timestamps are not provided, set to false)

@@ -41,6 +41,12 @@ bool System::initialize()
     else
         std::cout << "ERROR: Wrong Mode!" << std::endl;
 
+    int verbose = Config::read<int>("verbose");
+    if (verbose == 0)
+        verbose_ = false;
+    else
+        verbose_ = true;
+
     // ArUco Detector ---------------------------------------------------------
     predifined_dictionary_name_ = Config::read<std::string>("predifined_dictionary_name");
     marker_length_ = Config::read<float>("marker_length");
@@ -74,6 +80,7 @@ bool System::initialize()
     // aruco detector ---------------------------------------------------------
     aruco_detector_ = std::make_shared<ArUco_Detector>(
         target_id, predifined_dictionary_name_, marker_length_, mono_camera_);
+    aruco_detector_->set_verbose(verbose);
     if (mode_ == MISSION)
         aruco_detector_->set_input_mode(ArUco_Detector::Input_Mode::RASPBERRY);
     
