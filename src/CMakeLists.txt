@@ -6,7 +6,8 @@ add_library(tello_slam SHARED
     marker/aruco_detector.cpp
     port/config.cpp
     port/setting.cpp
-    supervisor.cpp
+    tool/supervisor.cpp
+    tool/tool_system.cpp
     system.cpp)
 
 target_link_libraries(tello_slam 

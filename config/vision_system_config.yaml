@@ -13,10 +13,10 @@ verbose: 0
 
 # Input ///////////////////////////////////////////////////////////////////////
 # usb, video, tello
-input_mode: tello
+input_mode: usb
 
 # USB Camera
-USB_camera_ID: 2
+USB_camera_ID: 0
 
 # Setting
 setting_file_path: ./config/sensor_setting.yaml

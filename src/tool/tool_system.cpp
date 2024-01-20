@@ -11,8 +11,8 @@
 // reference:
 
 
-#include "system.h"
 #include "port/config.h"
+#include "tool/tool_system.h"
 
 
 namespace tello_slam
@@ -20,11 +20,11 @@ namespace tello_slam
 
 // public XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 // constructor & destructor ///////////////////////////////////////////////////
-System::System(const std::string& configuration_file_path)
+Tool_System::Tool_System(const std::string& configuration_file_path)
     : configuration_file_path_(configuration_file_path) {}
 
 // member methods /////////////////////////////////////////////////////////////
-bool System::initialize()
+bool Tool_System::initialize()
 {
     // read from config file ==================================================
     if (Config::initialize(configuration_file_path_) == false)
@@ -74,7 +74,7 @@ bool System::initialize()
     mono_camera_scale_factor_ = Config::read<float>("mono_camera_scale_factor");
     mono_camera_->rescale(mono_camera_scale_factor_);
     
-    // create vision system components ========================================
+    // create system components ===============================================
     int target_id = 0; // initial value
     
     // aruco detector ---------------------------------------------------------
@@ -83,15 +83,41 @@ bool System::initialize()
     aruco_detector_->set_verbose(verbose);
     if (mode_ == MISSION)
         aruco_detector_->set_input_mode(ArUco_Detector::Input_Mode::RASPBERRY);
+
+    // IMU reader -------------------------------------------------------------
+    imu_reader_ = std::make_shared<IMU_Reader>();
+
+    // supervisor -------------------------------------------------------------
+    supervisor_ = std::make_shared<Supervisor>();
+    supervisor_->set_aruco_detector(aruco_detector_);
+    supervisor_->set_imu_reader(imu_reader_);
     
     return true;
 }
 
 // member methods /////////////////////////////////////////////////////////////
 // ----------------------------------------------------------------------------
-void System::run()
+void Tool_System::run()
 {
     std::cout << "System: initiate" << std::endl;
+    std::cout << "System: exit" << std::endl;
+}
+
+// ----------------------------------------------------------------------------
+void Tool_System::run_roll_reader()
+{
+    std::cout << "System: initiate" << std::endl;
+
+    // aruco_detector_->run();
+    while (true)
+    {
+
+    }
+
+    std::cout << "System: close" << std::endl;
+    imu_reader_->close();
+    supervisor_->close();
+
     std::cout << "System: exit" << std::endl;
 }
 

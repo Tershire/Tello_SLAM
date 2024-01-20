@@ -25,30 +25,33 @@ namespace tello_slam
 // constructor & destructor ///////////////////////////////////////////////////
 Supervisor::Supervisor()
 {
-    thread_loop_ = std::thread(&Supervisor::thread_loop, this);
-
     motion_log_on_ = Config::read<int>("motion_log_on");
 }
 
 // getters & setters //////////////////////////////////////////////////////////
 
 // member methods /////////////////////////////////////////////////////////////
+void Supervisor::run_as_thread()
+{
+    thread_ = std::thread(&Supervisor::thread_task, this);
+}
+
 void Supervisor::close()
 {
-    viewer_running_ = false;
-    thread_loop_.join();
+    supervisor_running_ = false;
+    thread_.join();
 }
 
 // private XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 // member methods /////////////////////////////////////////////////////////////
-void Supervisor::thread_loop()
+void Supervisor::thread_task()
 {
     pangolin::CreateWindowAndBind("VO: Map", 1024, 768);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // Viewer setting =========================================================
+    // Supervisor setting =====================================================
     // define projection and initial ModelView matrix
     pangolin::OpenGlRenderState s_cam(
         pangolin::ProjectionMatrix(1024, 768, 400, 400, 512, 384, 0.1, 1000),
@@ -102,7 +105,7 @@ void Supervisor::thread_loop()
     const float WHITE[3] = {1.0F, 1.0F, 1.0F};
     const float RED[3] = {1.0F, 0.0F, 0.0F};
 
-    while (!pangolin::ShouldQuit() && viewer_running_)
+    while (!pangolin::ShouldQuit() && supervisor_running_)
     {
         // clear screen and activate view to render into
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -135,14 +138,16 @@ void Supervisor::thread_loop()
         // log ================================================================
         if (motion_log_on_ && !do_pause_)
         {
-            int32_t roll_imu = imu_reader_->get_current_roll();
-            log.Log(roll_imu);
+            std::unique_lock<std::mutex> lock(mutex_);
+            current_roll_imu_ = imu_reader_->get_current_roll();
+            // std::cout << current_roll_imu_ << std::endl;
+
+            log.Log(current_roll_imu_);
         }
 
         pangolin::FinishFrame();
     }
 
-    // LOG(INFO) << "viewer: thread loop ended";
     std::cout << "viewer: thread loop ended" << std::endl;
 }
 

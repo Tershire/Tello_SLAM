@@ -34,14 +34,30 @@ public:
     // getter =================================================================
     int32_t get_current_roll() const {return current_roll_;}
 
+    // setter =================================================================
+    void set_tello(Tello* tello)
+    {
+        tello_ = tello;
+        std::cout << "[IMU Reader] Tello is set." << std::endl;
+
+        // test
+        std::cout << "-\t battery: " << tello_->state().battery << " [%]" << std::endl;
+    }
+
     // member methods /////////////////////////////////////////////////////////
     bool run();
 
+    bool run_as_thread();
+    void close();
+
 private:
     // member data ////////////////////////////////////////////////////////////
-    Tello tello_;
+    Tello* tello_;
 
     int32_t current_roll_;
+
+    std::thread thread_;
+    std::mutex mutex_;
 };
 
 } // namespace tello_slam

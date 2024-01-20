@@ -28,10 +28,10 @@ namespace tello_slam
 /**
  * vision system
  */
-class System
+class Tool_System
 {
 public:
-    typedef std::shared_ptr<System> Ptr;
+    typedef std::shared_ptr<Tool_System> Ptr;
 
     // state member ///////////////////////////////////////////////////////////
     enum Mode
@@ -48,7 +48,7 @@ public:
     bool verbose_;
 
     // constructor & destructor ///////////////////////////////////////////////
-    System(const std::string& configuration_file_path);
+    Tool_System(const std::string& configuration_file_path);
 
     // getter & setter ////////////////////////////////////////////////////////
     // getter =================================================================
@@ -92,6 +92,7 @@ private:
     // system components ======================================================
     ArUco_Detector::Ptr aruco_detector_ = nullptr;
     IMU_Reader::Ptr imu_reader_ = nullptr;
+    Supervisor::Ptr supervisor_ = nullptr;
 
     // ArUco Detector =========================================================
     std::string predifined_dictionary_name_;

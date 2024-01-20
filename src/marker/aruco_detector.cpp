@@ -248,9 +248,7 @@ bool ArUco_Detector::run()
                     previous_T_cm_ = std::make_shared<SE3>(T_cm);
 
                     // interface ==============================================
-                    // t_cm = T_cm.translation();
-                    // double t_cm_temp[3] = {t_cm[0], t_cm[1], t_cm[2]};
-                    // std::copy(std::begin(t_cm_temp), std::end(t_cm_temp), std::begin(t_cm_));
+                    // t_cm = T_cm.translation();tello_cm_));
 
                     // update_state_output();
                     /// =======================================================
@@ -311,6 +309,18 @@ bool ArUco_Detector::run()
     std::cout << "END" << std::endl;
 
     return true;
+}
+
+// ----------------------------------------------------------------------------
+bool ArUco_Detector::run_as_thread()
+{
+    thread_ = std::thread(&ArUco_Detector::run, this);
+}
+
+// ----------------------------------------------------------------------------
+void ArUco_Detector::close()
+{
+    thread_.join();
 }
 
 // ============================================================================

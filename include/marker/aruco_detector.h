@@ -74,6 +74,9 @@ public:
     // member methods /////////////////////////////////////////////////////////
     bool run();
 
+    bool run_as_thread();
+    void close();
+
     int find_target_index(const std::vector<int>& ids) const;
 
     // interface ==============================================================
@@ -88,6 +91,8 @@ private:
     cv::aruco::DetectorParameters detector_parameters_;
 
     cv::Ptr<cv::aruco::ArucoDetector> detector_;
+
+    std::thread thread_;
 
     // camera =================================================================
     Camera::Ptr camera_;
