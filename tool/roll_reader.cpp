@@ -49,32 +49,34 @@ int main(int argc, char **argv)
 	std::cin >> target_id;
     aruco_detector->set_target_id(target_id);
 
-    IMU_Reader::Ptr imu_reader = tool_system->get_imu_reader();
-    imu_reader->set_tello(&tello);
+    // IMU_Reader::Ptr imu_reader = tool_system->get_imu_reader();
+    // imu_reader->set_tello(&tello);
 
     // initiate threads =======================================================
-    imu_reader->run_as_thread();
-    aruco_detector->run();
-    // aruco_detector->run_as_thread(); // double free or corruption (out); Aborted (core dumped)
+    // imu_reader->run_as_thread();
+    // imu_thread = std::thread(read_imu, &std::ref(tello)); // not working
+    // aruco_detector->run();
+    aruco_detector->run_as_thread(); // double free or corruption (out); Aborted (core dumped)
 
     // main thread task =======================================================
-    // for (;;)
-    // {
-    //     // std::cout << "/";
-    //     if (cv::waitKey(1) == 27) {
-    //         break;
-    //     }
-    // }
+    for (;;)
+    {
+        // std::cout << "/";
+        if (cv::waitKey(1) == 27) {
+            break;
+        }
+    }
 
     // join threads ===========================================================
-    imu_reader->close();
+    // imu_thread.join();
+    // imu_reader->close();
     aruco_detector->close();
     
     return 0;
 }
 
 // helper /////////////////////////////////////////////////////////////////////
-bool read_imu(Tello& tello)
+bool read_imu(Tello* tello)
 {
     int32_t current_roll;
     for (;;)
@@ -87,7 +89,7 @@ bool read_imu(Tello& tello)
 
         // {pitch, roll, yaw}
         // Vec3 euler_angles_IMU{tello_.state().pitch, tello_.state().roll, tello_.state().yaw};s
-        current_roll = tello.state().roll;
+        current_roll = tello->state().roll;
         std::cout << current_roll << std::endl;
     }
 }

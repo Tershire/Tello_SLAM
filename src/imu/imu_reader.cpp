@@ -19,10 +19,7 @@ namespace tello_slam
 
 // public XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 // constructor & destructor ///////////////////////////////////////////////////
-IMU_Reader::IMU_Reader()
-{
-    thread_ = std::thread(&IMU_Reader::run, this);
-}
+IMU_Reader::IMU_Reader() {}
 
 // member methods /////////////////////////////////////////////////////////////
 bool IMU_Reader::run()
@@ -43,6 +40,8 @@ bool IMU_Reader::run()
 
         std::cout << "[IMU Reader] " << current_roll_ << std::endl;
     }
+
+    return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -50,6 +49,8 @@ bool IMU_Reader::run_as_thread()
 {
     std::cout << "[IMU Reader] started running as thread." << std::endl;
     thread_ = std::thread(&IMU_Reader::run, this);
+
+    return true;
 }
 
 // ----------------------------------------------------------------------------

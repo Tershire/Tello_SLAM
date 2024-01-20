@@ -107,6 +107,7 @@ bool ArUco_Detector::run()
         case RASPBERRY:
             cap = cv::VideoCapture(Config::read<std::string>("raspberry_pipeline"));    
     }
+    std::cout << "[ArUco Detector] got cap." << std::endl;
 
     if (input_mode_ == USB ||
         input_mode_ == VIDEO ||
@@ -314,7 +315,10 @@ bool ArUco_Detector::run()
 // ----------------------------------------------------------------------------
 bool ArUco_Detector::run_as_thread()
 {
+    std::cout << "[ArUco Detector] started running as thread." << std::endl;
     thread_ = std::thread(&ArUco_Detector::run, this);
+
+    return true;
 }
 
 // ----------------------------------------------------------------------------

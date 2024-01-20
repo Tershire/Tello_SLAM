@@ -9,11 +9,11 @@
 # test, mission
 mode: test
 
-verbose: 0
+verbose: 1
 
 # Input ///////////////////////////////////////////////////////////////////////
 # usb, video, tello
-input_mode: usb
+input_mode: tello
 
 # USB Camera
 USB_camera_ID: 0
