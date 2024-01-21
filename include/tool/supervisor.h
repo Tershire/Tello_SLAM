@@ -45,7 +45,7 @@ public:
     // setter =================================================================
     void set_aruco_detector(ArUco_Detector::Ptr aruco_detector) {aruco_detector_ = aruco_detector;}
     void set_imu_reader(IMU_Reader::Ptr imu_reader) {imu_reader_ = imu_reader;}
-    void set_current_roll_imu(int32_t &current_roll_imu) {current_roll_imu_ = current_roll_imu;}
+    void set_current_roll_imu(const int32_t& current_roll_imu) {current_roll_imu_ = current_roll_imu;}
 
     // member methods /////////////////////////////////////////////////////////
     void run_as_thread();

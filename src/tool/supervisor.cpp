@@ -138,11 +138,7 @@ void Supervisor::thread_task()
         // log ================================================================
         if (motion_log_on_ && !do_pause_)
         {
-            std::unique_lock<std::mutex> lock(mutex_);
-            current_roll_imu_ = imu_reader_->get_current_roll();
-            // std::cout << current_roll_imu_ << std::endl;
-
-            log.Log(current_roll_imu_);
+             log.Log(current_roll_imu_);
         }
 
         pangolin::FinishFrame();
