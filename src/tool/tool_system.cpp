@@ -33,30 +33,17 @@ bool Tool_System::initialize()
     }
 
     // read configuration =====================================================
-    std::string mode = Config::read<std::string>("mode");
-    if (mode == "test")
-        mode_ = TEST;
-    else if (mode == "mission")
-        mode_ = MISSION;
-    else
-        std::cout << "ERROR: Wrong Mode!" << std::endl;
-
     int verbose = Config::read<int>("verbose");
     if (verbose == 0)
         verbose_ = false;
     else
         verbose_ = true;
 
-    // ArUco Detector ---------------------------------------------------------
-    predifined_dictionary_name_ = Config::read<std::string>("predifined_dictionary_name");
-    marker_length_ = Config::read<float>("marker_length");
-
     // port ===================================================================
     setting_ = std::make_shared<Setting>(Config::read<std::string>("setting_file_path"));
 
     // load camera ------------------------------------------------------------
     usb_camera_ = setting_->get_usb_camera();
-    raspberry_camera_ = setting_->get_raspberry_camera();
     color_imager_ = setting_->get_color_imager();
 
     // set mono camera --------------------------------------------------------
@@ -77,20 +64,20 @@ bool Tool_System::initialize()
     // create system components ===============================================
     int target_id = 0; // initial value
     
-    // aruco detector ---------------------------------------------------------
+    // ArUco detector ---------------------------------------------------------
+    predifined_dictionary_name_ = Config::read<std::string>("predifined_dictionary_name");
+    marker_length_ = Config::read<float>("marker_length");
     aruco_detector_ = std::make_shared<ArUco_Detector>(
         target_id, predifined_dictionary_name_, marker_length_, mono_camera_);
     aruco_detector_->set_verbose(verbose);
-    if (mode_ == MISSION)
-        aruco_detector_->set_input_mode(ArUco_Detector::Input_Mode::RASPBERRY);
 
     // IMU reader -------------------------------------------------------------
-    imu_reader_ = std::make_shared<IMU_Reader>();
+    // imu_reader_ = std::make_shared<IMU_Reader>();
 
     // supervisor -------------------------------------------------------------
     supervisor_ = std::make_shared<Supervisor>();
     supervisor_->set_aruco_detector(aruco_detector_);
-    supervisor_->set_imu_reader(imu_reader_);
+    // supervisor_->set_imu_reader(imu_reader_);
     
     return true;
 }
@@ -100,24 +87,6 @@ bool Tool_System::initialize()
 void Tool_System::run()
 {
     std::cout << "System: initiate" << std::endl;
-    std::cout << "System: exit" << std::endl;
-}
-
-// ----------------------------------------------------------------------------
-void Tool_System::run_roll_reader()
-{
-    std::cout << "System: initiate" << std::endl;
-
-    // aruco_detector_->run();
-    while (true)
-    {
-
-    }
-
-    std::cout << "System: close" << std::endl;
-    imu_reader_->close();
-    supervisor_->close();
-
     std::cout << "System: exit" << std::endl;
 }
 
