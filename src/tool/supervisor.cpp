@@ -76,7 +76,7 @@ void Supervisor::thread_task()
     log.SetLabels(labels);
 
     // create interactive view in window
-    pangolin::Plotter plotter(&log, 0.0, 600, -180, 180, 30, 0.5);
+    pangolin::Plotter plotter(&log, 0.0, 1200, -180, 180, 30, 0.5);
     plotter.Track("$i"); // (TO DO) does it follow correctly in accordance with the timestamp (?)
 
     // Add some sample annotations to the plot (TO DO) what is this (?)
