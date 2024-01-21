@@ -63,6 +63,8 @@ public:
     // getter & setter ////////////////////////////////////////////////////////
     // getter =================================================================
     SE3 get_T_cm() const {return T_cm_;}
+    Vec3 get_euler_angles_cm() const {return euler_angles_cm_;}
+    bool get_target_found() const {return target_found_;}
 
     // setter =================================================================
     void set_target_id(const int& target_id) {target_id_ = target_id;}
@@ -102,8 +104,12 @@ private:
     // pose estimation ========================================================
     // PnP --------------------------------------------------------------------
     std::vector<cv::Point3d> p3Ds_target_;
+    bool target_found_;
+
     SE3 T_cm_; // current pose
     bool is_pose_ok_;
+
+    Vec3 euler_angles_cm_;
 
     // interface ==============================================================
     // double t_cm_[3] = {0, 0, 0};

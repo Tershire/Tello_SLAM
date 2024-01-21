@@ -62,6 +62,7 @@ private:
     bool supervisor_running_ = true;
 
     int32_t current_roll_imu_;
+    double current_roll_aruco_;
 
     // motion log =============================================================
     bool motion_log_on_;

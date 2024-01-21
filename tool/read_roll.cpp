@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     // main thread task =======================================================
     while (true)
     {
-        std::cout << "\a";
+        // std::cout << "\a";
         // std::cout << tello.state().roll << std::endl;
         supervisor->set_current_roll_imu(tello.state().roll);
     }

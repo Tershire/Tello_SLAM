@@ -9,7 +9,7 @@
 # test, mission
 mode: test
 
-verbose: 1
+verbose: 0
 
 # Input ///////////////////////////////////////////////////////////////////////
 # usb, video, tello

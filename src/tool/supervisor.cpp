@@ -71,11 +71,12 @@ void Supervisor::thread_task()
 
     // add named labels
     std::vector<std::string> labels;
-    labels.push_back(std::string("roll [deg]"));
+    labels.push_back(std::string("roll (IMU)   [deg]"));
+    labels.push_back(std::string("roll (ArUco) [deg]"));
     log.SetLabels(labels);
 
     // create interactive view in window
-    pangolin::Plotter plotter(&log, 0.0, 300, -1, 1, 30, 0.5);
+    pangolin::Plotter plotter(&log, 0.0, 600, -180, 180, 30, 0.5);
     plotter.Track("$i"); // (TO DO) does it follow correctly in accordance with the timestamp (?)
 
     // Add some sample annotations to the plot (TO DO) what is this (?)
@@ -97,7 +98,7 @@ void Supervisor::thread_task()
         .SetBounds(0.0, 1.0, 0.0, pangolin::Attach::Pix(175));
 
     // toggle
-    pangolin::Var<bool>      toggle_pause("menu.Pause"     , true , true );
+    pangolin::Var<bool>      toggle_pause("menu.Pause"     , false, true );
     pangolin::Var<bool> button_next_frame("menu.Next Frame", false, false);
     // ------------------------------------------------------------------------
 
@@ -138,7 +139,16 @@ void Supervisor::thread_task()
         // log ================================================================
         if (motion_log_on_ && !do_pause_)
         {
-             log.Log(current_roll_imu_);
+            if (aruco_detector_->get_target_found() == true)
+            {
+                current_roll_aruco_ = -1.0*aruco_detector_->get_euler_angles_cm()[0]*(180/M_PI);
+            }
+            else
+            {
+                current_roll_aruco_ = NAN;
+            }
+
+            log.Log(current_roll_imu_, current_roll_aruco_);
         }
 
         pangolin::FinishFrame();

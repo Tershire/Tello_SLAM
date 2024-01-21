@@ -11,6 +11,8 @@
 // reference:
 
 
+#include <unsupported/Eigen/EulerAngles>
+
 #include "marker/aruco_detector.h"
 #include "port/config.h"
 #include "toolbox/conversion_toolbox.h"
@@ -163,17 +165,18 @@ bool ArUco_Detector::run()
     for (;;)
     {     
         // load frame /////////////////////////////////////////////////////////
-        if (input_mode_ == USB ||
-            input_mode_ == VIDEO ||
-            input_mode_ == TELLO ||
-            input_mode_ == RASPBERRY)
-        {
-            cap >> image;
-        }
-        else if (input_mode_ == REALSENSE)
-        {
-            //
-        }
+        // if (input_mode_ == USB ||
+        //     input_mode_ == VIDEO ||
+        //     input_mode_ == TELLO ||
+        //     input_mode_ == RASPBERRY)
+        // {
+        //     cap >> image;
+        // }
+        // else if (input_mode_ == REALSENSE)
+        // {
+        //     //
+        // }
+        cap >> image;
 
         // check frame
         if (image.empty()) 
@@ -194,8 +197,8 @@ bool ArUco_Detector::run()
         // convert to grayscale
         cv::cvtColor(image, image, cv::COLOR_BGR2GRAY);
             
-        // apply blur filter (to reduce noise)
-        cv::blur(image, image, cv::Size(3, 3)); // Sobel
+        // // apply blur filter (to reduce noise)
+        // cv::blur(image, image, cv::Size(3, 3)); // Sobel
 
         // --------------------------------------------------------------------
         // convert to BGR for output
@@ -209,9 +212,10 @@ bool ArUco_Detector::run()
         detector_->detectMarkers(image, p2Dss_pixel, ids, rejected_p2Dss_pixel);
 
         target_index = find_target_index(ids);
+        target_found_ = target_index >= 0;
 
         // estimate pose ======================================================
-        if (target_index >= 0) // if target found
+        if (target_found_)
         {   
             std::vector<cv::Point2f> p2Ds_pixel = p2Dss_pixel.at(target_index);
 
@@ -227,6 +231,21 @@ bool ArUco_Detector::run()
             R_cm << rmat(0, 0), rmat(0, 1), rmat(0, 2),
                     rmat(1, 0), rmat(1, 1), rmat(1, 2),
                     rmat(2, 0), rmat(2, 1), rmat(2, 2);
+
+            // convert to euler angles ----------------------------------------
+            /* <!> (TO DO) ANGLE STRANGE EXCEPT ROLL. NEED FIX 
+            https://stackoverflow.com/questions/31589901/euler-to-quaternion-quaternion-to-euler-using-eigen */
+
+            // euler_angles_cm_ = R_cm.eulerAngles(2, 1, 0);
+            euler_angles_cm_ = Eigen::EulerAngles<double, Eigen::EulerSystemZYX>(R_cm).angles();
+            if (verbose_)
+            {
+                Vec3 euler_angles_deg = euler_angles_cm_.transpose()*(180/M_PI);
+                euler_angles_deg[0] = -euler_angles_deg[0];
+                printf("(roll, pitch, yaw): (%5.0f, %5.0f, %5.0f)\n", 
+                    euler_angles_deg[0], euler_angles_deg[2], euler_angles_deg[1]);
+            }
+            // ----------------------------------------------------------------
 
             t_cm = Vec3(tvec[0], tvec[1], tvec[2]);
 
