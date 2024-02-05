@@ -48,6 +48,8 @@
 
 # image
 *.jpg
+*.jpeg
+*.png
 
 # model
 *.pt
