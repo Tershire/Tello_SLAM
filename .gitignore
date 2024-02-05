@@ -52,5 +52,6 @@
 # model
 *.pt
 
-
+# jupyter
+**.ipynb_checkpoints**
 
