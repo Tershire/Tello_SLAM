@@ -45,3 +45,12 @@
 
 # python virtual environment
 **venv**
+
+# image
+*.jpg
+
+# model
+*.pt
+
+
+
