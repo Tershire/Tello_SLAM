@@ -43,3 +43,5 @@
 # setting
 *setting.yaml
 
+# python virtual environment
+**venv**
