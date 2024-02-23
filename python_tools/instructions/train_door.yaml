@@ -1,0 +1,12 @@
+path: 
+
+train: 
+val:
+test:
+
+nc: 3
+names: 
+    0: "open"
+    1: "semi"
+    2: "closed"
+
