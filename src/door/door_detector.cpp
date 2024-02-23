@@ -8,7 +8,8 @@
 // 2024 FEB 23
 // Wonhee LEE
 
-// reference:
+// reference: 
+// https://github.com/ultralytics/ultralytics/tree/main/examples/YOLOv8-CPP-Inference
 
 
 #include <fstream> // std::ifstream
