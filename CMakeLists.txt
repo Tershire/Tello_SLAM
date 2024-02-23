@@ -37,6 +37,7 @@ set(THIRD_PARTY_LIBS
 # #############################################################################
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/include/camera)
+include_directories(${PROJECT_SOURCE_DIR}/include/door)
 include_directories(${PROJECT_SOURCE_DIR}/include/imu)
 include_directories(${PROJECT_SOURCE_DIR}/include/marker)
 include_directories(${PROJECT_SOURCE_DIR}/include/port)
