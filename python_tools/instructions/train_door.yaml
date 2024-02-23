@@ -1,12 +1,11 @@
-path: 
+path: "/home/tershire/Pictures/doors"
 
-train: 
-val:
-test:
+train: "train"
+val: "val"
+test: "test"
 
 nc: 3
 names: 
     0: "open"
     1: "semi"
     2: "closed"
-
