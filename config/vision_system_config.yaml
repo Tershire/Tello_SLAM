@@ -41,6 +41,14 @@ mono_camera_type: usb
 predifined_dictionary_name: DICT_5X5_50
 marker_length: 14.5E-2
 
+# Door Detector ///////////////////////////////////////////////////////////////
+model_path: 
+enable_CUDA: 1 # 1 for true, 0 for false
+
+score_threshold: 0.5
+confidence_threshold: 0.5
+nms_threshold: 0.5
+
 # Supervisor //////////////////////////////////////////////////////////////////
 # motion log __________________________________________________________________
 motion_log_on: 1 # 1 for true, 0 for false (if timestamps are not provided, set to false)

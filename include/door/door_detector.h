@@ -137,11 +137,13 @@ private:
 
     // neural net =============================================================
     cv::dnn::Net net_;
-    float confidence_threshold_, nms_threshold_;
-
+    float score_threshold_, confidence_threshold_, nms_threshold_;
     std::vector<std::string> output_layer_names_;
 
     bool is_detected_ = false;
+
+    bool letter_box_for_square_ = true;
+    cv::Size input_shape_ = {640, 640};
 
     // tracking ===============================================================
     cv::Ptr<cv::Tracker> tracker_;
@@ -158,7 +160,9 @@ private:
     void post_process(cv::Mat& image, const std::vector<cv::Mat>& output_blobs,
         std::vector<int>& class_IDs,
         std::vector<float>& confidences,
-        std::vector<cv::Rect>& boxes);
+        std::vector<cv::Rect>& boxes,
+        std::tuple<float, float>& model_factors,
+        bool& is_yolo_v8);
 
     // criteria to detect only one cone =======================================
     bool find_the_nearest_one(cv::Mat& image,
@@ -169,6 +173,13 @@ private:
         int& class_ID,
         float& confidence,
         cv::Rect& box);
+
+    // ========================================================================
+    std::tuple<float, float> get_model_factors(cv::Mat& input, 
+        std::vector<cv::Mat>& output_blobs,
+        bool& is_yolo_v8);
+
+    cv::Mat format_to_square(const cv::Mat& source);
 };
 
 } // namespace tello_slam

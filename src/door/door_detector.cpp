@@ -28,16 +28,28 @@ Door_Detector::Door_Detector(Camera::Ptr camera)
     : camera_(camera)
 {
     // neural net =============================================================
-    std::string cfg_path, weights_path;
-    cfg_path     = Config::read<std::string>("cfg_path");
-    weights_path = Config::read<std::string>("weights_path");
+    std::string model_path;
+    bool enable_CUDA;
+    model_path = Config::read<std::string>("model_path");
+    enable_CUDA = Config::read<int>("enable_CUDA");
 
     // load network
-    net_ = cv::dnn::readNetFromDarknet(cfg_path, weights_path);
-    net_.setPreferableBackend(cv::dnn::DNN_BACKEND_OPENCV);
-    net_.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
-
+    net_ = cv::dnn::readNetFromONNX(model_path);
+    if (enable_CUDA)
+    {
+        std::cout << "\nrunning on CUDA" << std::endl;
+        net_.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
+        net_.setPreferableTarget(cv::dnn::DNN_TARGET_CUDA);
+    }
+    else
+    {
+        std::cout << "\nrunning on CPU" << std::endl;
+        net_.setPreferableBackend(cv::dnn::DNN_BACKEND_OPENCV);
+        net_.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
+    }
+    
     // thresholds
+    score_threshold_ = Config::read<float>("score_threshold");
     confidence_threshold_ = Config::read<float>("confidence_threshold");
     nms_threshold_ = Config::read<float>("nms_threshold");
 
@@ -222,15 +234,25 @@ bool Door_Detector::detect(cv::Mat& image,
     std::vector<float>& confidences,
     std::vector<cv::Rect>& boxes)
 {
+    // adjust input image size
+    cv::Mat input = image;
+    if (letter_box_for_square_ && input_shape_.width == input_shape_.height)
+        input = format_to_square(input);
+
     // set input
-    net_.setInput(cv::dnn::blobFromImage(image, 1/255.0, cv::Size(416, 416), cv::Scalar(0,0,0), true, false));
+    net_.setInput(cv::dnn::blobFromImage(input, 1/255.0, input_shape_, cv::Scalar(), true, false));
     
     // main
     std::vector<cv::Mat> output_blobs;
     net_.forward(output_blobs, output_layer_names_);
 
+    // determine YOLO version and adjust
+    bool is_yolo_v8 = false;
+    std::tuple<float, float> model_factors;
+    model_factors = get_model_factors(input, output_blobs, is_yolo_v8);
+    
     // post-processing
-    post_process(image, output_blobs, class_IDs, confidences, boxes);
+    post_process(image, output_blobs, class_IDs, confidences, boxes, model_factors, is_yolo_v8);
 
     // check if anyone is found
     if (boxes.empty())
@@ -403,34 +425,76 @@ std::map<unsigned int, std::string> Door_Detector::get_classes(const std::string
 void Door_Detector::post_process(cv::Mat& image, const std::vector<cv::Mat>& output_blobs,
     std::vector<int>& class_IDs,
     std::vector<float>& confidences,
-    std::vector<cv::Rect>& boxes)
+    std::vector<cv::Rect>& boxes,
+    std::tuple<float, float>& model_factors,
+    bool& is_yolo_v8)
 {
+    float x_factor = std::get<0>(model_factors);
+    float y_factor = std::get<1>(model_factors);
+
     for (size_t i = 0; i < output_blobs.size(); ++i)
     {
         cv::Mat output_blob = output_blobs[i];
         float* data = (float*) output_blob.data;
         for (int j = 0; j < output_blob.rows; ++j)
         {
-            /// get scores, which are located from column 5
-            cv::Mat scores = output_blob.row(j).colRange(5, output_blob.cols);
-            
-            // get value & location of max score (class confidence)
-            double confidence;
-            cv::Point class_ID_point;
-            cv::minMaxLoc(scores, 0, &confidence, 0, &class_ID_point);
-            if (confidence > confidence_threshold_)
+            if (is_yolo_v8)
             {
-                int center_x = int(data[0] * image.cols);
-                int center_y = int(data[1] * image.rows);
-                int width  = int(data[2] * image.cols);
-                int height = int(data[3] * image.rows);
-                int left = center_x - width  / 2;
-                int top  = center_y - height / 2;
+                float* classes_scores = data + 4;
+                cv::Mat scores(1, classes_.size(), CV_32FC1, classes_scores);
                 
-                class_IDs.push_back(class_ID_point.x);
-                confidences.push_back(float(confidence)); 
-                boxes.push_back(cv::Rect(left, top, width, height)); 
+                double max_class_score;
+                cv::Point class_ID_point;
+                cv::minMaxLoc(scores, 0, &max_class_score, 0, &class_ID_point);
+
+                if (max_class_score > score_threshold_)
+                {
+                    float x = data[0];
+                    float y = data[1];
+                    float w = data[2];
+                    float h = data[3];
+
+                    int left = int((x - 0.5 * w) * x_factor);
+                    int top = int((y - 0.5 * h) * y_factor);
+                    int width = int(w * x_factor);
+                    int height = int(h * y_factor);
+                    
+                    class_IDs.push_back(class_ID_point.x);
+                    confidences.push_back(max_class_score); 
+                    boxes.push_back(cv::Rect(left, top, width, height)); 
+                }
             }
+            else // YOLO v5
+            {
+                float confidence = data[4];
+
+                if (confidence > confidence_threshold_)
+                {
+                    float* classes_scores = data + 5;
+                    cv::Mat scores(1, classes_.size(), CV_32FC1, classes_scores);
+                
+                    double max_class_score;
+                    cv::Point class_ID_point;
+                    cv::minMaxLoc(scores, 0, &max_class_score, 0, &class_ID_point);
+                    if (max_class_score > score_threshold_)
+                    {
+                        float x = data[0];
+                        float y = data[1];
+                        float w = data[2];
+                        float h = data[3];
+
+                        int left = int((x - 0.5 * w) * x_factor);
+                        int top = int((y - 0.5 * h) * y_factor);
+                        int width = int(w * x_factor);
+                        int height = int(h * y_factor);
+                        
+                        class_IDs.push_back(class_ID_point.x);
+                        confidences.push_back(max_class_score); 
+                        boxes.push_back(cv::Rect(left, top, width, height)); 
+                    }
+                }
+            }
+
             data += output_blob.cols;
         }
     }
@@ -513,6 +577,42 @@ bool Door_Detector::find_the_nearest_one(cv::Mat& image,
     }
     
     return is_detected;
+}
+
+// ============================================================================
+// ----------------------------------------------------------------------------
+cv::Mat Door_Detector::format_to_square(const cv::Mat& source)
+{
+    int col = source.cols;
+    int row = source.rows;
+    int max = MAX(col, row);
+    cv::Mat result = cv::Mat::zeros(max, max, CV_8UC3);
+    source.copyTo(result(cv::Rect(0, 0, col, row)));
+    return result;
+}
+
+// ----------------------------------------------------------------------------
+std::tuple<float, float> Door_Detector::get_model_factors(cv::Mat& input,
+    std::vector<cv::Mat>& output_blobs,
+    bool& is_yolo_v8)
+{
+    int num_output_rows = output_blobs[0].size[1];
+    int num_output_cols = output_blobs[0].size[2];
+
+    if (num_output_cols > num_output_rows)
+    {
+        is_yolo_v8 = true;
+        // swap
+        num_output_rows = output_blobs[0].size[2];
+        num_output_cols = output_blobs[0].size[1];
+
+        output_blobs[0] = output_blobs[0].reshape(1, num_output_cols);
+        cv::transpose(output_blobs[0], output_blobs[0]);
+    }
+
+    float x_factor = input.cols / input_shape_.width;
+    float y_factor = input.rows / input_shape_.height;
+    return {x_factor, y_factor};
 }
 
 } // namespace tello_slam

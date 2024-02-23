@@ -80,6 +80,13 @@
         "variant": "cpp",
         "__nullptr": "cpp",
         "core": "cpp",
-        "eulerangles": "cpp"
+        "eulerangles": "cpp",
+        "__hash_table": "cpp",
+        "__split_buffer": "cpp",
+        "__tree": "cpp",
+        "queue": "cpp",
+        "stack": "cpp",
+        "ios": "cpp",
+        "__locale": "cpp"
     }
 }
