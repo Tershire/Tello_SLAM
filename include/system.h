@@ -89,7 +89,8 @@ private:
     
     Camera::Ptr mono_camera_;
     std::string mono_camera_type_;
-    float mono_camera_scale_factor_;    
+    float mono_camera_scale_factor_;
+    float input_resize_factor_;   
 
     // system components ======================================================
     ArUco_Detector::Ptr aruco_detector_ = nullptr;

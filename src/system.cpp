@@ -73,6 +73,9 @@ bool System::initialize()
     // rescale ----------------------------------------------------------------
     mono_camera_scale_factor_ = Config::read<float>("mono_camera_scale_factor");
     mono_camera_->rescale(mono_camera_scale_factor_);
+
+    input_resize_factor_ = Config::read<float>("input_resize_factor");
+    // (TODO) both factors could be unified into one.
     
     // create vision system components ========================================
     int target_id = 0; // initial value
@@ -88,6 +91,7 @@ bool System::initialize()
     door_detector_ = std::make_shared<Door_Detector>(mono_camera_);
     door_detector_->set_is_for_tracking_only_one(false);
     door_detector_->set_verbose(verbose);
+    door_detector_->set_input_resize_factor(input_resize_factor_);
     
     return true;
 }

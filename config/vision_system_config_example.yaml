@@ -9,11 +9,11 @@
 # test, mission
 mode: test
 
-verbose: 1
+verbose: 0
 
 # Input ///////////////////////////////////////////////////////////////////////
 # usb, video, tello
-input_mode: usb
+input_mode: video
 
 # USB Camera
 USB_camera_ID: 2
@@ -22,16 +22,17 @@ USB_camera_ID: 2
 setting_file_path: ./config/sensor_setting.yaml
 
 # Video
-video_file_path: /media/tershire/Samsung_T3/VIDEO/ionmav/20230807_release_test.mp4
+video_file_path: /home/tershire/Videos/doors/matrix-backdoors.mp4
 
 # Tello
 tello_video_stream: "udp://0.0.0.0:11111"
 
 # image size
+input_resize_factor: 0.5
 mono_camera_scale_factor: 1.0
 
 # Output //////////////////////////////////////////////////////////////////////
-resize_scale_factor: 0.75
+resize_scale_factor: 1.25
 
 # System //////////////////////////////////////////////////////////////////////
 # which camera type is used for the mono camera: usb, raspberry
@@ -44,7 +45,7 @@ marker_length: 14.5E-2
 # Door Detector ///////////////////////////////////////////////////////////////
 # model_path ex) ./models/yolov8s.onnx
 # names_path ex) ./config/coco.names
-model_path: ./models/yolov8n_door_run5.onnx 
+model_path: ./models/yolov8n_door_run6.onnx 
 names_path: ./config/door.names 
 enable_CUDA: 0 # 1 for true, 0 for false (1 currently not supported)
 
