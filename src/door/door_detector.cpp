@@ -479,7 +479,7 @@ void Door_Detector::post_process(cv::Mat& image, const std::vector<cv::Mat>& out
 
         float* data = (float*) output_blob.data;
         //
-        std::cout << "(data[0], data[1], data[2], data[3]): " << Vec4(data[0], data[1], data[2], data[3]).transpose() << std::endl;
+        if (verbose_) std::cout << "(data[0], data[1], data[2], data[3]): " << Vec4(data[0], data[1], data[2], data[3]).transpose() << std::endl;
         // for (int j = 0; j < output_blob.rows; ++j)
         for (int j = 0; j < num_output_rows; ++j)
         {
