@@ -11,6 +11,13 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 # DEPENDENCIES ################################################################
+# CUDA
+# set(CUDA_TOOLKIT_ROOT_DIR "/usr/local/cuda")
+# find_package(CUDA 12 REQUIRED)
+
+# set(CMAKE_CUDA_STANDARD 12)
+# set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+
 # OpenCV
 find_package(OpenCV 4 REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})

@@ -46,7 +46,7 @@ marker_length: 14.5E-2
 # names_path ex) ./config/coco.names
 model_path: ./models/yolov8n_door_run5.onnx 
 names_path: ./config/door.names 
-enable_CUDA: 0 # 1 for true, 0 for false
+enable_CUDA: 0 # 1 for true, 0 for false (1 currently not supported)
 
 score_threshold: 0.5
 confidence_threshold: 0.5
