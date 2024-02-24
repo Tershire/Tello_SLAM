@@ -42,8 +42,10 @@ predifined_dictionary_name: DICT_5X5_50
 marker_length: 14.5E-2
 
 # Door Detector ///////////////////////////////////////////////////////////////
-model_path: ./models/yolov8s.onnx
-names_path: ./config/coco.names
+# model_path ex) ./models/yolov8s.onnx
+# names_path ex) ./config/coco.names
+model_path: ./models/yolov8n_door_run5.onnx 
+names_path: ./config/door.names 
 enable_CUDA: 0 # 1 for true, 0 for false
 
 score_threshold: 0.5
