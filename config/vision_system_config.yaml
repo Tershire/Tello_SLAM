@@ -9,14 +9,14 @@
 # test, mission
 mode: test
 
-verbose: 0
+verbose: 1
 
 # Input ///////////////////////////////////////////////////////////////////////
 # usb, video, tello
-input_mode: tello
+input_mode: usb
 
 # USB Camera
-USB_camera_ID: 0
+USB_camera_ID: 2
 
 # Setting
 setting_file_path: ./config/sensor_setting.yaml
@@ -42,8 +42,9 @@ predifined_dictionary_name: DICT_5X5_50
 marker_length: 14.5E-2
 
 # Door Detector ///////////////////////////////////////////////////////////////
-model_path: ./python_tools/models/yolov8n.pt
-enable_CUDA: 1 # 1 for true, 0 for false
+model_path: ./models/yolov8s.onnx
+names_path: ./config/coco.names
+enable_CUDA: 0 # 1 for true, 0 for false
 
 score_threshold: 0.5
 confidence_threshold: 0.5

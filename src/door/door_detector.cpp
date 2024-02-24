@@ -238,28 +238,44 @@ bool Door_Detector::detect(cv::Mat& image,
     // adjust input image size
     cv::Mat input = image;
     if (letter_box_for_square_ && input_shape_.width == input_shape_.height)
+    {
+        //
+        // std::cout << input.size() << std::endl; // -> [1920 x 1080]
+
         input = format_to_square(input);
 
+        //
+        // std::cout << input.size() << std::endl; // -> [1920 x 1920]
+    }
+
+    //
+    // std::cout << "input_shape_: " << input_shape_ << std::endl; // -> [640 x 640]
+
     // set input
-    net_.setInput(cv::dnn::blobFromImage(input, 1/255.0, input_shape_, cv::Scalar(), true, false));
+    cv::Mat blob;
+    cv::dnn::blobFromImage(input, blob, 1.0/255.0, input_shape_, cv::Scalar(), true, false);
+    net_.setInput(blob);
     
     // main
     std::vector<cv::Mat> output_blobs;
-    net_.forward(output_blobs, output_layer_names_);
+    net_.forward(output_blobs, net_.getUnconnectedOutLayersNames());
+    // net_.forward(output_blobs, output_layer_names_);
+    //
+    // std::cout << "output_blobs.size(): " << output_blobs.size() << std::endl;
 
     // determine YOLO version and adjust
-    bool is_yolo_v8 = false;
-    std::tuple<float, float> model_factors;
-    model_factors = get_model_factors(input, output_blobs, is_yolo_v8);
+    // bool is_yolo_v8 = false;
+    // std::tuple<float, float> model_factors;
+    // model_factors = get_model_factors(input, output_blobs, is_yolo_v8);
     
     // post-processing
-    post_process(image, output_blobs, class_IDs, confidences, boxes, model_factors, is_yolo_v8);
+    post_process(image, output_blobs, class_IDs, confidences, boxes, input);
 
     // check if anyone is found
     if (boxes.empty())
         return false;
     else
-        return true; 
+        return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -427,17 +443,45 @@ void Door_Detector::post_process(cv::Mat& image, const std::vector<cv::Mat>& out
     std::vector<int>& class_IDs,
     std::vector<float>& confidences,
     std::vector<cv::Rect>& boxes,
-    std::tuple<float, float>& model_factors,
-    bool& is_yolo_v8)
+    cv::Mat& input)
 {
-    float x_factor = std::get<0>(model_factors);
-    float y_factor = std::get<1>(model_factors);
+    // float x_factor = std::get<0>(model_factors);
+    // float y_factor = std::get<1>(model_factors);
+    //
+    // std::cout << "model factors:" << x_factor << ", " << y_factor << std::endl;
 
     for (size_t i = 0; i < output_blobs.size(); ++i)
     {
+        //
+        // std::cout << "output_blobs.size(): " << output_blobs.size() << std::endl; // -> 1
+
         cv::Mat output_blob = output_blobs[i];
+
+        int num_output_rows = output_blob.size[1];
+        int num_output_cols = output_blob.size[2];
+        //
+        // std::cout << "num_output (rows, cols): " << Vec2(num_output_rows, num_output_cols).transpose() << std::endl; // -> (84, 8400)
+
+        bool is_yolo_v8 = false;
+        if (num_output_cols > num_output_rows)
+        {
+            is_yolo_v8 = true;
+            // swap
+            num_output_rows = output_blob.size[2];
+            num_output_cols = output_blob.size[1];
+
+            output_blob = output_blob.reshape(1, num_output_cols);
+            cv::transpose(output_blob, output_blob);
+        }
+
+        float x_factor = input.cols / input_shape_.width;
+        float y_factor = input.rows / input_shape_.height;
+
         float* data = (float*) output_blob.data;
-        for (int j = 0; j < output_blob.rows; ++j)
+        //
+        std::cout << "(data[0], data[1], data[2], data[3]): " << Vec4(data[0], data[1], data[2], data[3]).transpose() << std::endl;
+        // for (int j = 0; j < output_blob.rows; ++j)
+        for (int j = 0; j < num_output_rows; ++j)
         {
             if (is_yolo_v8)
             {
@@ -447,9 +491,16 @@ void Door_Detector::post_process(cv::Mat& image, const std::vector<cv::Mat>& out
                 double max_class_score;
                 cv::Point class_ID_point;
                 cv::minMaxLoc(scores, 0, &max_class_score, 0, &class_ID_point);
+                //
+                // std::cout << "max_class_score: " << max_class_score << std::endl;
 
                 if (max_class_score > score_threshold_)
                 {
+                    //
+                    // std::cout << "passed score threshold !" << std::endl;
+                    //
+                    if (verbose_) std::cout << "class_ID_point.x: " << class_ID_point.x << std::endl;
+
                     float x = data[0];
                     float y = data[1];
                     float w = data[2];
@@ -459,6 +510,15 @@ void Door_Detector::post_process(cv::Mat& image, const std::vector<cv::Mat>& out
                     int top = int((y - 0.5 * h) * y_factor);
                     int width = int(w * x_factor);
                     int height = int(h * y_factor);
+                    
+                    //
+                    if (verbose_)
+                    {
+                        std::cout << Vec4(data[0], data[1], data[2], data[3]).transpose() << std::endl;
+                        std::cout << "(x_factor, y_factor): " << Vec2(x_factor, y_factor).transpose() << std::endl;
+                        std::cout << "(x, y, w, h): " << Vec4(x, y, w, h).transpose() << std::endl;
+                        std::cout << "box (L, T, W, H): " << Vec4(left, top, width, height).transpose() << std::endl;
+                    }
                     
                     class_IDs.push_back(class_ID_point.x);
                     confidences.push_back(max_class_score); 
@@ -473,7 +533,7 @@ void Door_Detector::post_process(cv::Mat& image, const std::vector<cv::Mat>& out
                 {
                     float* classes_scores = data + 5;
                     cv::Mat scores(1, classes_.size(), CV_32FC1, classes_scores);
-                
+
                     double max_class_score;
                     cv::Point class_ID_point;
                     cv::minMaxLoc(scores, 0, &max_class_score, 0, &class_ID_point);
@@ -496,7 +556,8 @@ void Door_Detector::post_process(cv::Mat& image, const std::vector<cv::Mat>& out
                 }
             }
 
-            data += output_blob.cols;
+            // data += output_blob.cols;
+            data += num_output_cols;
         }
     }
     
@@ -505,7 +566,8 @@ void Door_Detector::post_process(cv::Mat& image, const std::vector<cv::Mat>& out
     std::vector<float> filtered_confidences;
     std::vector<cv::Rect> filtered_boxes;
     std::vector<int> indices;
-    cv::dnn::NMSBoxes(boxes, confidences, confidence_threshold_, nms_threshold_, indices);
+    cv::dnn::NMSBoxes(boxes, confidences, score_threshold_, nms_threshold_, indices);
+    // cv::dnn::NMSBoxes(boxes, confidences, confidence_threshold_, nms_threshold_, indices);
 
     int index;
     for (size_t i = 0; i < indices.size(); ++i)

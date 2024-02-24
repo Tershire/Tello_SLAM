@@ -83,6 +83,11 @@ bool System::initialize()
     aruco_detector_->set_verbose(verbose);
     if (mode_ == MISSION)
         aruco_detector_->set_input_mode(ArUco_Detector::Input_Mode::RASPBERRY);
+
+    // door detector ----------------------------------------------------------
+    door_detector_ = std::make_shared<Door_Detector>(mono_camera_);
+    door_detector_->set_is_for_tracking_only_one(false);
+    door_detector_->set_verbose(verbose);
     
     return true;
 }

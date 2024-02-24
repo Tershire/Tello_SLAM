@@ -20,6 +20,7 @@
 #include "marker/aruco_detector.h"
 #include "imu/imu_reader.h"
 #include "supervisor.h"
+#include "door/door_detector.h"
 
 
 namespace tello_slam
@@ -54,6 +55,7 @@ public:
     // getter =================================================================
     ArUco_Detector::Ptr get_aruco_detector() const {return aruco_detector_;}
     IMU_Reader::Ptr get_imu_reader() const {return imu_reader_;}
+    Door_Detector::Ptr get_door_detector() const {return door_detector_;}
 
     // member methods /////////////////////////////////////////////////////////
     /**
@@ -92,6 +94,7 @@ private:
     // system components ======================================================
     ArUco_Detector::Ptr aruco_detector_ = nullptr;
     IMU_Reader::Ptr imu_reader_ = nullptr;
+    Door_Detector::Ptr door_detector_ = nullptr;
 
     // ArUco Detector =========================================================
     std::string predifined_dictionary_name_;

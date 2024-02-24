@@ -40,6 +40,8 @@ public:
     };
 
     // member data ////////////////////////////////////////////////////////////
+    bool verbose_;
+
     // neural net =============================================================
     std::map<unsigned int, std::string> classes_;
 
@@ -62,6 +64,7 @@ public:
 
     // port -------------------------------------------------------------------
     void set_input_mode(const Input_Mode& input_mode) {input_mode_ = input_mode;}
+    void set_verbose(const bool& verbose) {verbose_ = verbose;}
 
     // member methods /////////////////////////////////////////////////////////
     /**
@@ -143,7 +146,7 @@ private:
     bool is_detected_ = false;
 
     bool letter_box_for_square_ = true;
-    cv::Size input_shape_ = {640, 640};
+    cv::Size2f input_shape_ = {640, 640};
 
     // tracking ===============================================================
     cv::Ptr<cv::Tracker> tracker_;
@@ -161,8 +164,7 @@ private:
         std::vector<int>& class_IDs,
         std::vector<float>& confidences,
         std::vector<cv::Rect>& boxes,
-        std::tuple<float, float>& model_factors,
-        bool& is_yolo_v8);
+        cv::Mat& input);
 
     // criteria to detect only one cone =======================================
     bool find_the_nearest_one(cv::Mat& image,

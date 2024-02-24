@@ -54,7 +54,12 @@
 # model
 runs/
 *.pt
+*.onnx
 
 # jupyter
 .ipynb_checkpoints
+
+# inference
+*.names
+
 
