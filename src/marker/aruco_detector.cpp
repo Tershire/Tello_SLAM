@@ -81,7 +81,10 @@ ArUco_Detector::ArUco_Detector(const int& target_id,
 
     resize_scale_factor_ = Config::read<float>("resize_scale_factor");
 
-    mono_camera_scale_factor_ = Config::read<float>("mono_camera_scale_factor");   
+    mono_camera_scale_factor_ = Config::read<float>("mono_camera_scale_factor");
+
+    // data collection ========================================================
+    csv_file_name_ = Config::read<std::string>("csv_file_name");
 }
 
 // member methods /////////////////////////////////////////////////////////////
@@ -407,7 +410,7 @@ bool ArUco_Detector::run_for_data_collection()
     Mat33 R_cm;
 
     // data collection ========================================================
-    ofstream_.open("run1.csv");
+    ofstream_.open(csv_file_name_);
     
     ///////////////////////////////////////////////////////////////////////////
     for (;;)
@@ -499,7 +502,7 @@ bool ArUco_Detector::run_for_data_collection()
             cv::aruco::drawDetectedMarkers(image_out, p2Dss_pixel, ids);
         }
 
-        if (target_index >= 0 && is_pose_ok_)
+        if (target_index >= 0)
         {
             cv::drawFrameAxes(image_out, cameraMatrix_, distCoeffs_, rvec, tvec, 0.1, 2);
         }

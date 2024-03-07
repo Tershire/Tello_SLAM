@@ -130,6 +130,7 @@ private:
     // data collection ========================================================
     long t_;
     std::ofstream ofstream_;
+    std::string csv_file_name_;
 
     // member methods /////////////////////////////////////////////////////////
     inline double compute_pose_error(SE3 T_cm)
