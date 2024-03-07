@@ -112,6 +112,8 @@ private:
 
     Vec3 euler_angles_cm_;
 
+    long t_;
+
     // interface ==============================================================
     // double t_cm_[3] = {0, 0, 0};
 

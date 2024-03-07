@@ -9,9 +9,11 @@
 // Wonhee LEE
 
 // reference:
+// https://stackoverflow.com/questions/997946/how-to-get-current-time-and-date-in-c
 
 
 #include <unsupported/Eigen/EulerAngles>
+#include <chrono> // for experiment
 
 #include "marker/aruco_detector.h"
 #include "port/config.h"
@@ -163,7 +165,7 @@ bool ArUco_Detector::run()
     ///////////////////////////////////////////////////////////////////////////
     unsigned int frame_count = 0;
     for (;;)
-    {     
+    {   
         // load frame /////////////////////////////////////////////////////////
         // if (input_mode_ == USB ||
         //     input_mode_ == VIDEO ||
@@ -406,8 +408,12 @@ bool ArUco_Detector::run_minimal()
     
     ///////////////////////////////////////////////////////////////////////////
     for (;;)
-    {     
+    {    
         cap >> image;
+
+        auto now = std::chrono::system_clock::now();
+        auto t = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+        t_ = t.count();
 
         // check frame
         if (image.empty()) 
@@ -487,7 +493,11 @@ bool ArUco_Detector::run_minimal()
         }
 
         if (verbose_)
-            std::cout << "T_cm:\n" << T_cm_.matrix() << std::endl; 
+        {
+            // std::cout << "system clock: " << std::ctime(&t) << ":" << millisecond.count() << std::endl;
+            std::cout << "t_: " << t_ << std::endl;
+            std::cout << "T_cm:\n" << T_cm_.matrix() << std::endl;
+        }
 
         // show ===============================================================
         // resize
