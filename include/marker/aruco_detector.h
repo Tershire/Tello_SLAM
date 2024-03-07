@@ -14,6 +14,8 @@
 #ifndef TELLOSLAM_MARKER_ARUCODETECTOR_H
 #define TELLOSLAM_MARKER_ARUCODETECTOR_H
 
+#include <fstream>
+
 #include "common.h"
 #include "camera/camera.h"
 
@@ -75,9 +77,10 @@ public:
 
     // member methods /////////////////////////////////////////////////////////
     bool run();
-    bool run_minimal();
+    bool run_for_data_collection();
 
     bool run_as_thread();
+    bool run_for_data_collection_as_thread();
     void close();
 
     int find_target_index(const std::vector<int>& ids) const;
@@ -112,8 +115,6 @@ private:
 
     Vec3 euler_angles_cm_;
 
-    long t_;
-
     // interface ==============================================================
     // double t_cm_[3] = {0, 0, 0};
 
@@ -125,6 +126,10 @@ private:
     float resize_scale_factor_;
 
     float mono_camera_scale_factor_;
+
+    // data collection ========================================================
+    long t_;
+    std::ofstream ofstream_;
 
     // member methods /////////////////////////////////////////////////////////
     inline double compute_pose_error(SE3 T_cm)

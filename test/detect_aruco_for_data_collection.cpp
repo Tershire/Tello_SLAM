@@ -35,7 +35,7 @@ int main(int argc, char **argv)
     aruco_detector->set_target_id(target_id);
     */
 
-    aruco_detector->run_minimal();
+    aruco_detector->run_for_data_collection();
 
     return 0;
 }

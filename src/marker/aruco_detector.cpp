@@ -81,7 +81,7 @@ ArUco_Detector::ArUco_Detector(const int& target_id,
 
     resize_scale_factor_ = Config::read<float>("resize_scale_factor");
 
-    mono_camera_scale_factor_ = Config::read<float>("mono_camera_scale_factor");
+    mono_camera_scale_factor_ = Config::read<float>("mono_camera_scale_factor");   
 }
 
 // member methods /////////////////////////////////////////////////////////////
@@ -161,7 +161,7 @@ bool ArUco_Detector::run()
     const float POSE_ERROR_THRESHOLD = 0.5;
     float reset_time_window = 0.1; // [s]
     const unsigned int NUM_FRAMES_DURING_RESET_TIME_WINDOW = ceil(reset_time_window * fps);
-    
+
     ///////////////////////////////////////////////////////////////////////////
     unsigned int frame_count = 0;
     for (;;)
@@ -334,7 +334,7 @@ bool ArUco_Detector::run()
 }
 
 // ----------------------------------------------------------------------------
-bool ArUco_Detector::run_minimal()
+bool ArUco_Detector::run_for_data_collection()
 {
     // image //////////////////////////////////////////////////////////////////
     cv::Mat image, image_out;
@@ -405,6 +405,9 @@ bool ArUco_Detector::run_minimal()
     // in Eigen & Sophus
     Vec3 r_cm, t_cm;
     Mat33 R_cm;
+
+    // data collection ========================================================
+    ofstream_.open("run1.csv");
     
     ///////////////////////////////////////////////////////////////////////////
     for (;;)
@@ -466,6 +469,7 @@ bool ArUco_Detector::run_minimal()
             // convert rotation vector to rotation matrix
             cv::Rodrigues(rvec, rmat);
 
+            /*
             // convert to Eigen then Sophus
             R_cm << rmat(0, 0), rmat(0, 1), rmat(0, 2),
                     rmat(1, 0), rmat(1, 1), rmat(1, 2),
@@ -478,6 +482,14 @@ bool ArUco_Detector::run_minimal()
 
             //
             T_cm_ = T_cm;
+            */
+
+            // output
+            ofstream_ << t_ << ',' << 
+                rmat(0, 0) << ',' << rmat(0, 1) << ',' << rmat(0, 2) << ',' <<
+                rmat(1, 0) << ',' << rmat(1, 1) << ',' << rmat(1, 2) << ',' <<
+                rmat(2, 0) << ',' << rmat(2, 1) << ',' << rmat(2, 2) << ',' <<
+                tvec[0] << ',' << tvec[1] << ',' << tvec[2] << '\n';
         }
 
         // output /////////////////////////////////////////////////////////////
@@ -498,7 +510,7 @@ bool ArUco_Detector::run_minimal()
             std::cout << "t_: " << t_ << std::endl;
             std::cout << "T_cm:\n" << T_cm_.matrix() << std::endl;
         }
-
+ 
         // show ===============================================================
         // resize
         cv::resize(image_out, image_out, cv::Size(), resize_scale_factor_, resize_scale_factor_, cv::INTER_LINEAR);
@@ -511,6 +523,7 @@ bool ArUco_Detector::run_minimal()
             break; // quit when 'esc' pressed
         }
     }
+    ofstream_.close();
     std::cout << "END" << std::endl;
 
     return true;
@@ -521,6 +534,15 @@ bool ArUco_Detector::run_as_thread()
 {
     std::cout << "[ArUco Detector] started running as thread." << std::endl;
     thread_ = std::thread(&ArUco_Detector::run, this);
+
+    return true;
+}
+
+// ----------------------------------------------------------------------------
+bool ArUco_Detector::run_for_data_collection_as_thread()
+{
+    std::cout << "[ArUco Detector] started running as thread." << std::endl;
+    thread_ = std::thread(&ArUco_Detector::run_for_data_collection, this);
 
     return true;
 }
