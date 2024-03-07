@@ -6,6 +6,7 @@ add_executable(tello_vision_test tello_vision_test.cpp)
 add_executable(tello_sensor_test tello_sensor_test.cpp)
 add_executable(detect_door detect_door.cpp)
 add_executable(detect_aruco_for_data_collection detect_aruco_for_data_collection.cpp)
+add_executable(tello_vision_test_minimal tello_vision_test_minimal.cpp)
 
 target_link_libraries(detect_aruco
     tello_slam ${THIRD_PARTY_LIBS})
@@ -22,4 +23,6 @@ target_link_libraries(tello_sensor_test
 target_link_libraries(detect_door
     tello_slam ${THIRD_PARTY_LIBS})
 target_link_libraries(detect_aruco_for_data_collection
+    tello_slam ${THIRD_PARTY_LIBS})
+target_link_libraries(tello_vision_test_minimal
     tello_slam ${THIRD_PARTY_LIBS})

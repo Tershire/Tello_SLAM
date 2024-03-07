@@ -25,7 +25,7 @@ setting_file_path: ./config/sensor_setting.yaml
 video_file_path: /home/tershire/Videos/doors/matrix-backdoors.mp4
 
 # Tello
-tello_video_stream: "udp://0.0.0.0:11111"
+tello_video_stream: "udp://0.0.0.0:11111"  # "" os meeded
 
 # image size
 input_resize_factor: 0.5
@@ -42,6 +42,9 @@ mono_camera_type: usb
 target_ID: 0
 predifined_dictionary_name: DICT_5X5_50
 marker_length: 14.5E-2
+
+# data collection _____________________________________________________________
+csv_file_name: run01.csv
 
 # Door Detector ///////////////////////////////////////////////////////////////
 # model_path ex) ./models/yolov8s.onnx
