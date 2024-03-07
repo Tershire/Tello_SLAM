@@ -75,6 +75,7 @@ public:
 
     // member methods /////////////////////////////////////////////////////////
     bool run();
+    bool run_minimal();
 
     bool run_as_thread();
     void close();

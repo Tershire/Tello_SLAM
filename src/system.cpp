@@ -78,9 +78,8 @@ bool System::initialize()
     // (TODO) both factors could be unified into one.
     
     // create vision system components ========================================
-    int target_id = 0; // initial value
-    
     // aruco detector ---------------------------------------------------------
+    int target_id = Config::read<int>("target_ID");
     aruco_detector_ = std::make_shared<ArUco_Detector>(
         target_id, predifined_dictionary_name_, marker_length_, mono_camera_);
     aruco_detector_->set_verbose(verbose);

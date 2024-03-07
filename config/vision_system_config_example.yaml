@@ -39,6 +39,7 @@ resize_scale_factor: 1.25
 mono_camera_type: usb
 
 # Aruco Detector //////////////////////////////////////////////////////////////
+target_ID: 0
 predifined_dictionary_name: DICT_5X5_50
 marker_length: 14.5E-2
 
