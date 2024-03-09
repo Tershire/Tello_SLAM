@@ -63,4 +63,7 @@ runs/
 # inference
 *.names
 
+# output_data
+output_data/
+*.csv
 
