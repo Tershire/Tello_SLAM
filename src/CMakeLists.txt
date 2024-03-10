@@ -12,6 +12,7 @@ add_library(tello_slam SHARED
     port/setting.cpp
     tool/supervisor.cpp
     tool/tool_system.cpp
+    map.cpp
     system.cpp)
 
 target_link_libraries(tello_slam 

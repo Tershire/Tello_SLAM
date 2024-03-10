@@ -88,6 +88,7 @@
         "stack": "cpp",
         "ios": "cpp",
         "__locale": "cpp",
-        "__node_handle": "cpp"
+        "__node_handle": "cpp",
+        "__mutex_base": "cpp"
     }
 }
