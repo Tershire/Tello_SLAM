@@ -1,23 +1,20 @@
-// aruco_feature.h
+// aruco_landmark.h
 
 /////////////////////////
 // IONLAB ISAE-SUPAERO //
 // TELLO SLAM PROJECT  //
 /////////////////////////
 
-// 2024 MAR 09
+// 2024 MAR 10
 // Wonhee LEE
 
-// reference:
+// reference: slambook
 
 
 #pragma once
 
-#ifndef TELLOSLAM_ARUCOFEATURE_H
-#define TELLOSLAM_ARUCOFEATURE_H
-
-#include <memory>
-#include <opencv2/features2d.hpp>
+#ifndef TELLOSLAM_ARUCOLANDMARK_H
+#define TELLOSLAM_ARUCOLANDMARK_H
 
 #include "common.h"
 
@@ -26,29 +23,31 @@ namespace tello_slam
 {
 
 /**
- * keypoints and associated landmarks
+ * representation of a ArUco landmark as a 6D pose.
  */
-struct Aruco_Feature: public Feature
+struct Aruco_Landmark : public Landmark
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
-    typedef std::shared_ptr<Aruco_Feature> Ptr;
+    typedef std::shared_ptr<Aruco_Landmark> Ptr;
 
     // member data ////////////////////////////////////////////////////////////
-    int aruco_id_; // ArUco marker ID
+    unsigned long aruco_id_ = 0; // ArUco marker ID
     SE3 T_mw_; // marker pose w.r.t the world
 
-public:
+    // std::mutex_T_mw_;
+    
     // constructor & destructor ///////////////////////////////////////////////
-    Aruco_Feature() {}
+    Aruco_Landmark() {}
 
-    Aruco_Feature(std::shared_ptr<Frame> frame, const cv::KeyPoint& keypoint, const int& aruco_id, const SE3& T_mw)
-        : Feature(frame, keypoint)
+    Aruco_Landmark(long id, Vec3 position):
+        : Landmark(id, position)
     {
         aruco_id_ = aruco_id;
         T_mw_ = T_mw;
     }
 
+    // getter & setter ////////////////////////////////////////////////////////
     // getter =================================================================
     Vec3 get_aruco_id()
     {
@@ -63,4 +62,4 @@ public:
 
 } // namespace tello_slam
 
-#endif // TELLOSLAM_ARUCOFEATURE_H
+#endif // TELLOSLAM_ARUCOLANDMARK_H

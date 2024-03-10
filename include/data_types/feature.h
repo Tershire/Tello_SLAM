@@ -25,11 +25,12 @@
 namespace tello_slam
 {
 
-// struct Frame;
-// struct Map_Point;
+struct Frame;
+struct Landmark;
 
 /**
- * keypoints and associated map points
+ * keypoints and associated landmarks
+ * and the frame that holds them.
  */
 struct Feature
 {
@@ -39,18 +40,17 @@ public:
 
     // member data ////////////////////////////////////////////////////////////
     std::weak_ptr<Frame> frame_; // frame that holds the feature
-    cv::KeyPoint keypoint_; // keypoint
-    std::weak_ptr<Map_Point> map_point_; // associated map point
     
+    cv::KeyPoint keypoint_; // keypoint
+    std::weak_ptr<Landmark> landmark_; // associated landmark
+
     bool is_outlier_ = false; // is it an outlier
-    // bool is_on_image_L_ = true;
 
 public:
     // constructor & destructor ///////////////////////////////////////////////
     Feature() {}
 
-    Feature(std::shared_ptr<Frame> frame, const cv::KeyPoint& keypoint):
-        frame_(frame), keypoint_(keypoint) {}
+    Feature(std::shared_ptr<Frame> frame, const cv::KeyPoint& keypoint);
 };
 
 } // namespace tello_slam
