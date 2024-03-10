@@ -89,6 +89,8 @@
         "ios": "cpp",
         "__locale": "cpp",
         "__node_handle": "cpp",
-        "__mutex_base": "cpp"
+        "__mutex_base": "cpp",
+        "hash_map": "cpp",
+        "hash_set": "cpp"
     }
 }

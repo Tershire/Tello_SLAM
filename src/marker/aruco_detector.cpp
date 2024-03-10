@@ -62,7 +62,7 @@ ArUco_Detector::ArUco_Detector(const int& target_id,
     cv::Point3d p3D1_target( marker_length / 2,  marker_length / 2, 0);
     cv::Point3d p3D2_target( marker_length / 2, -marker_length / 2, 0);
     cv::Point3d p3D3_target(-marker_length / 2, -marker_length / 2, 0);
-    p3Ds_target_ = {p3D0_target, p3D1_target, p3D2_target, p3D3_target};
+    p3Ds_marker_ = {p3D0_target, p3D1_target, p3D2_target, p3D3_target};
 
     // port ===================================================================
     std::string input_mode = Config::read<std::string>("input_mode");
@@ -88,6 +88,58 @@ ArUco_Detector::ArUco_Detector(const int& target_id,
 }
 
 // member methods /////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+bool ArUco_Detector::detect(cv::Mat& image, std::vector<int>& ids, 
+    std::vector<std::vector<cv::Point2f>>& p2Dss_pixel)
+{
+    std::vector<std::vector<cv::Point2f>> rejected_p2Dss_pixel;
+    detector_->detectMarkers(image, p2Dss_pixel, ids, rejected_p2Dss_pixel);
+
+    return true;
+}
+
+// ----------------------------------------------------------------------------
+bool ArUco_Detector::estimate_pose(std::vector<int>& ids, 
+    std::vector<std::vector<cv::Point2f>>& p2Dss_pixel,
+    std::vector<SE3>& Ts_cm)
+{
+    std::vector<cv::Point2f> p2Ds_pixel;
+
+    cv::Vec3d rvec, tvec;
+    cv::Matx33d rmat;
+
+    Vec3 r_cm, t_cm;
+    Mat33 R_cm;
+    SE3 T_cm;
+
+    for (size_t i = 0; i < ids.size(); ++i)
+    {
+        p2Ds_pixel = p2Dss_pixel.at(ids.at(i));
+
+        // estimate pose with RANSAC
+        cv::solvePnPRansac(p3Ds_marker_, p2Ds_pixel, 
+            cameraMatrix_, distCoeffs_, rvec, tvec, 
+            false, cv::SOLVEPNP_IPPE_SQUARE);
+
+        // convert rotation vector to rotation matrix
+        cv::Rodrigues(rvec, rmat);
+
+        // convert to Eigen
+        R_cm << rmat(0, 0), rmat(0, 1), rmat(0, 2),
+                rmat(1, 0), rmat(1, 1), rmat(1, 2),
+                rmat(2, 0), rmat(2, 1), rmat(2, 2);
+
+        t_cm = Vec3(tvec[0], tvec[1], tvec[2]);
+
+        // convert to Sophus
+        Quaternion q_cm(R_cm);
+        T_cm = SE3(q_cm, t_cm); // SE3(SO3(R_cm), t_cm)
+
+        Ts_cm.push_back(T_cm);
+    }
+}
+
+// ----------------------------------------------------------------------------
 bool ArUco_Detector::run()
 {
     // image //////////////////////////////////////////////////////////////////
@@ -225,7 +277,7 @@ bool ArUco_Detector::run()
             std::vector<cv::Point2f> p2Ds_pixel = p2Dss_pixel.at(target_index);
 
             // solve initial pose guess with RANSAC
-            cv::solvePnPRansac(p3Ds_target_, p2Ds_pixel, 
+            cv::solvePnPRansac(p3Ds_marker_, p2Ds_pixel, 
                 cameraMatrix_, distCoeffs_, rvec, tvec, 
                 false, cv::SOLVEPNP_IPPE_SQUARE);
 
@@ -264,7 +316,7 @@ bool ArUco_Detector::run()
                 if (pose_error < POSE_ERROR_THRESHOLD)
                 {
                     // refine pose iteratively using Levenberg-Marquardt method
-                    cv::solvePnPRefineLM(p3Ds_target_, p2Ds_pixel, 
+                    cv::solvePnPRefineLM(p3Ds_marker_, p2Ds_pixel, 
                         cameraMatrix_, distCoeffs_, rvec, tvec);
 
                     // update
@@ -337,215 +389,10 @@ bool ArUco_Detector::run()
 }
 
 // ----------------------------------------------------------------------------
-bool ArUco_Detector::run_for_data_collection()
-{
-    // image //////////////////////////////////////////////////////////////////
-    cv::Mat image, image_out;
-
-    // port ///////////////////////////////////////////////////////////////////
-    double fps;
-
-    cv::VideoCapture cap;
-    switch (input_mode_)
-    {
-        case USB:
-            cap = cv::VideoCapture(Config::read<int>("USB_camera_ID"));
-            break;
-
-        case VIDEO:
-            cap = cv::VideoCapture(Config::read<std::string>("video_file_path"));
-            break;
-
-        case TELLO:
-            cap = cv::VideoCapture(Config::read<std::string>("tello_video_stream"), cv::CAP_FFMPEG);
-            break;
-
-        case RASPBERRY:
-            cap = cv::VideoCapture(Config::read<std::string>("raspberry_pipeline"));    
-    }
-    std::cout << "[ArUco Detector] got cap." << std::endl;
-
-    if (input_mode_ == USB ||
-        input_mode_ == VIDEO ||
-        input_mode_ == TELLO ||
-        input_mode_ == RASPBERRY)
-    {
-        // check capture
-        if (!cap.isOpened()) 
-        {
-            std::cerr << "ERROR: capturer is not open\n";
-            return -1;
-        }
-
-        // get FPS
-        fps = cap.get(cv::CAP_PROP_FPS);
-
-        std::cout << "FPS: " << fps << std::endl;
-
-        // read first frame to get frame size
-        cap >> image; 
-    }
-    else if (input_mode_ == REALSENSE)
-    {
-        //
-    }
-
-    const int IMAGE_WIDTH  = image.size().width;
-    const int IMAGE_HEIGHT = image.size().height;
-    cv::Point IMAGE_CENTER(IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
-
-    // setting ////////////////////////////////////////////////////////////////
-    // main variable ==========================================================
-    SE3 T_cm;
-
-    // ArUco ==================================================================
-    int target_index = false;
-    
-    // pose estimation ========================================================
-    cv::Vec3d rvec, tvec; // rotation, translation vectors
-    cv::Matx33d rmat;
-
-    // in Eigen & Sophus
-    Vec3 r_cm, t_cm;
-    Mat33 R_cm;
-
-    // data collection ========================================================
-    ofstream_.open(csv_file_name_);
-    
-    ///////////////////////////////////////////////////////////////////////////
-    for (;;)
-    {    
-        cap >> image;
-
-        auto now = std::chrono::system_clock::now();
-        auto t = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
-        t_ = t.count();
-
-        // check frame
-        if (image.empty()) 
-        {
-            std::cerr << "ERROR: blank frame\n";
-            break;
-        }
-
-        // rescale ////////////////////////////////////////////////////////////
-        /*
-        if (input_mode_ == USB ||
-            input_mode_ == RASPBERRY)
-        {
-            cv::resize(image, image, cv::Size(), 
-                mono_camera_scale_factor_, mono_camera_scale_factor_, cv::INTER_LINEAR);
-        }
-        */
-        
-        // pre-processing /////////////////////////////////////////////////////
-        // convert to grayscale
-        cv::cvtColor(image, image, cv::COLOR_BGR2GRAY);
-            
-        // // apply blur filter (to reduce noise)
-        // cv::blur(image, image, cv::Size(3, 3)); // Sobel
-
-        // --------------------------------------------------------------------
-        // convert to BGR for output
-        cv::cvtColor(image, image_out, cv::COLOR_GRAY2BGR);
-        // --------------------------------------------------------------------
-
-        // main ///////////////////////////////////////////////////////////////
-        // detect =============================================================      
-        std::vector<int> ids;
-        std::vector<std::vector<cv::Point2f>> p2Dss_pixel, rejected_p2Dss_pixel;
-        detector_->detectMarkers(image, p2Dss_pixel, ids, rejected_p2Dss_pixel);
-
-        target_index = find_target_index(ids);
-        target_found_ = target_index >= 0;
-
-        // estimate pose ======================================================
-        if (target_found_)
-        {   
-            std::vector<cv::Point2f> p2Ds_pixel = p2Dss_pixel.at(target_index);
-
-            // solve initial pose guess with RANSAC
-            cv::solvePnPRansac(p3Ds_target_, p2Ds_pixel, 
-                cameraMatrix_, distCoeffs_, rvec, tvec, 
-                false, cv::SOLVEPNP_IPPE_SQUARE);
-
-            // convert rotation vector to rotation matrix
-            cv::Rodrigues(rvec, rmat);
-
-            /*
-            // convert to Eigen then Sophus
-            R_cm << rmat(0, 0), rmat(0, 1), rmat(0, 2),
-                    rmat(1, 0), rmat(1, 1), rmat(1, 2),
-                    rmat(2, 0), rmat(2, 1), rmat(2, 2);
-
-            t_cm = Vec3(tvec[0], tvec[1], tvec[2]);
-
-            Quaternion q_cm(R_cm);
-            T_cm = SE3(q_cm, t_cm); // SE3(SO3(R_cm), t_cm)
-
-            //
-            T_cm_ = T_cm;
-            */
-
-            // output
-            ofstream_ << t_ << ',' << 
-                rmat(0, 0) << ',' << rmat(0, 1) << ',' << rmat(0, 2) << ',' <<
-                rmat(1, 0) << ',' << rmat(1, 1) << ',' << rmat(1, 2) << ',' <<
-                rmat(2, 0) << ',' << rmat(2, 1) << ',' << rmat(2, 2) << ',' <<
-                tvec[0] << ',' << tvec[1] << ',' << tvec[2] << '\n';
-        }
-
-        // output /////////////////////////////////////////////////////////////
-        // draw ---------------------------------------------------------------
-        if (!ids.empty())
-        {
-            cv::aruco::drawDetectedMarkers(image_out, p2Dss_pixel, ids);
-        }
-
-        if (target_index >= 0)
-        {
-            cv::drawFrameAxes(image_out, cameraMatrix_, distCoeffs_, rvec, tvec, 0.1, 2);
-        }
-
-        if (verbose_)
-        {
-            // std::cout << "system clock: " << std::ctime(&t) << ":" << millisecond.count() << std::endl;
-            std::cout << "t_: " << t_ << std::endl;
-            std::cout << "T_cm:\n" << T_cm_.matrix() << std::endl;
-        }
- 
-        // show ===============================================================
-        // resize
-        cv::resize(image_out, image_out, cv::Size(), resize_scale_factor_, resize_scale_factor_, cv::INTER_LINEAR);
-
-        // show
-        cv::imshow("ArUco Tracker", image_out);
-        int key = cv::waitKey(10);
-        if (key == 27)
-        {
-            break; // quit when 'esc' pressed
-        }
-    }
-    ofstream_.close();
-    std::cout << "END" << std::endl;
-
-    return true;
-}
-
-// ----------------------------------------------------------------------------
 bool ArUco_Detector::run_as_thread()
 {
     std::cout << "[ArUco Detector] started running as thread." << std::endl;
     thread_ = std::thread(&ArUco_Detector::run, this);
-
-    return true;
-}
-
-// ----------------------------------------------------------------------------
-bool ArUco_Detector::run_for_data_collection_as_thread()
-{
-    std::cout << "[ArUco Detector] started running as thread." << std::endl;
-    thread_ = std::thread(&ArUco_Detector::run_for_data_collection, this);
 
     return true;
 }
@@ -569,15 +416,5 @@ int ArUco_Detector::find_target_index(const std::vector<int>& ids) const
         return -1;
     }
 }
-
-// interface ==================================================================
-// int ArUco_Detector::update_state_output()
-// {
-//     pthread_mutex_lock(t_cm_lock_);
-//     *t_cm_out_ = t_cm_;
-//     pthread_mutex_unlock(t_cm_lock_);
-
-//     return 0;
-// }
 
 } // namespace tello_slam

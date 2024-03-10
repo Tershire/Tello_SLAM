@@ -25,39 +25,46 @@ namespace tello_slam
 /**
  * representation of a ArUco landmark as a 6D pose.
  */
-struct Aruco_Landmark : public Landmark
+struct ArUco_Landmark : public Landmark
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
-    typedef std::shared_ptr<Aruco_Landmark> Ptr;
+    typedef std::shared_ptr<ArUco_Landmark> Ptr;
 
     // member data ////////////////////////////////////////////////////////////
     unsigned long aruco_id_ = 0; // ArUco marker ID
-    SE3 T_mw_; // marker pose w.r.t the world
+    SE3 T_wm_; // marker pose
 
-    // std::mutex_T_mw_;
+    std::mutex T_wm_mutex_;
     
     // constructor & destructor ///////////////////////////////////////////////
-    Aruco_Landmark() {}
+    ArUco_Landmark() {}
 
-    Aruco_Landmark(long id, Vec3 position):
+    ArUco_Landmark(long id, Vec3 position, long aruco_id, SE3 T_wm)
         : Landmark(id, position)
     {
         aruco_id_ = aruco_id;
-        T_mw_ = T_mw;
+        T_wm_ = T_wm;
     }
 
     // getter & setter ////////////////////////////////////////////////////////
     // getter =================================================================
-    Vec3 get_aruco_id()
+    unsigned long get_aruco_id()
     {
         return aruco_id_;
     }
 
-    SE3 get_T_mw()
+    SE3 get_T_wm()
     {
-        return T_mw_;
+        return T_wm_;
     }
+
+    // setter =================================================================
+    void set_T_wm(const SE3& T_wm)
+    {
+        std::unique_lock<std::mutex> lock(T_wm_mutex_);
+        T_wm_ = T_wm;
+    };
 };
 
 } // namespace tello_slam

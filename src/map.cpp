@@ -65,6 +65,21 @@ void Map::insert_landmark(Landmark::Ptr landmark)
 }
 
 // ----------------------------------------------------------------------------
+void Map::insert_aruco_landmark(ArUco_Landmark::Ptr aruco_landmark)
+{
+    if (aruco_landmarks_.find(aruco_landmark->id_) == aruco_landmarks_.end())
+    {
+        aruco_landmarks_.insert(make_pair(aruco_landmark->id_, aruco_landmark));
+        active_aruco_landmarks_.insert(make_pair(aruco_landmark->id_, aruco_landmark));
+    }
+    else
+    {
+        aruco_landmarks_[aruco_landmark->id_] = aruco_landmark;
+        active_aruco_landmarks_[aruco_landmark->id_] = aruco_landmark;
+    }
+}
+
+// ----------------------------------------------------------------------------
 void Map::remove_old_keyframe()
 {
     if (current_frame_ == nullptr) 

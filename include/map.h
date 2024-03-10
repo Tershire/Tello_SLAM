@@ -19,6 +19,7 @@
 #include "common.h"
 #include "frame.h"
 #include "landmark.h"
+#include "aruco_landmark.h"
 
 
 namespace tello_slam
@@ -36,22 +37,29 @@ public:
     
     typedef std::unordered_map<unsigned long, Frame::Ptr> keyframes_type;
     typedef std::unordered_map<unsigned long, Landmark::Ptr> landmarks_type;
+    typedef std::unordered_map<unsigned long, ArUco_Landmark::Ptr> aruco_landmarks_type;
 
     // constructor & destructor ///////////////////////////////////////////////
     Map();
 
     // getter & setter ////////////////////////////////////////////////////////
     // getter =================================================================
-    landmarks_type get_all_landmarks()
-    {
-        std::unique_lock<std::mutex> lock(data_mutex_);
-        return landmarks_;
-    }
-
     keyframes_type get_all_keyframes()
     {
         std::unique_lock<std::mutex> lock(data_mutex_);
         return keyframes_;
+    }
+
+    keyframes_type get_active_keyframes()
+    {
+        std::unique_lock<std::mutex> lock(data_mutex_);
+        return active_keyframes_;
+    }
+
+    landmarks_type get_all_landmarks()
+    {
+        std::unique_lock<std::mutex> lock(data_mutex_);
+        return landmarks_;
     }
 
     landmarks_type get_active_landmarks()
@@ -60,10 +68,16 @@ public:
         return active_landmarks_;
     }
 
-    keyframes_type get_active_keyframes()
+    aruco_landmarks_type get_all_aruco_landmarks()
     {
         std::unique_lock<std::mutex> lock(data_mutex_);
-        return active_keyframes_;
+        return aruco_landmarks_;
+    }
+
+    aruco_landmarks_type get_active_aruco_landmarks()
+    {
+        std::unique_lock<std::mutex> lock(data_mutex_);
+        return active_aruco_landmarks_;
     }
 
     // member methods /////////////////////////////////////////////////////////
@@ -78,16 +92,23 @@ public:
     void insert_landmark(Landmark::Ptr landmark);
 
     /**
+     * insert a ArUco landmark
+     */
+    void insert_aruco_landmark(ArUco_Landmark::Ptr aruco_landmark);
+
+    /**
      * clean up points in the map where the number of observations is zero
      */
     void clear();
 
 private:
     // member data ////////////////////////////////////////////////////////////
-    landmarks_type landmarks_; // all landmarks
-    landmarks_type active_landmarks_; // active landmarks
     keyframes_type keyframes_; // all keyframes
     keyframes_type active_keyframes_; // active keyframes
+    landmarks_type landmarks_; // all landmarks
+    landmarks_type active_landmarks_; // active landmarks
+    aruco_landmarks_type aruco_landmarks_; // all ArUco landmarks
+    aruco_landmarks_type active_aruco_landmarks_; // active ArUco landmarks
 
     Frame::Ptr current_frame_ = nullptr;
 

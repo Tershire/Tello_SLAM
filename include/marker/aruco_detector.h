@@ -51,10 +51,6 @@ public:
 
     bool verbose_;
 
-    // interface ==============================================================
-    // pthread_mutex_t* t_cm_lock_;
-    // double* t_cm_out_[3];
-
     // constructor & destructor ///////////////////////////////////////////////
     ArUco_Detector();
 
@@ -76,17 +72,20 @@ public:
     void set_input_mode(const Input_Mode& input_mode) {input_mode_ = input_mode;}
 
     // member methods /////////////////////////////////////////////////////////
+    bool detect(cv::Mat& image, std::vector<int>& ids, 
+        std::vector<std::vector<cv::Point2f>>& p2Dss_pixel);
+
+    bool estimate_pose(std::vector<int>& ids, 
+        std::vector<std::vector<cv::Point2f>>& p2Dss_pixel,
+        std::vector<SE3>& Ts_cm);
+
     bool run();
-    bool run_for_data_collection();
 
     bool run_as_thread();
-    bool run_for_data_collection_as_thread();
+
     void close();
 
     int find_target_index(const std::vector<int>& ids) const;
-
-    // interface ==============================================================
-    // int update_state_output();
 
 private:
     // member data ////////////////////////////////////////////////////////////
@@ -107,16 +106,13 @@ private:
 
     // pose estimation ========================================================
     // PnP --------------------------------------------------------------------
-    std::vector<cv::Point3d> p3Ds_target_;
+    std::vector<cv::Point3d> p3Ds_marker_;
     bool target_found_;
 
     SE3 T_cm_; // current pose
     bool is_pose_ok_;
 
     Vec3 euler_angles_cm_;
-
-    // interface ==============================================================
-    // double t_cm_[3] = {0, 0, 0};
 
     // filter =================================================================
     std::shared_ptr<SE3> previous_T_cm_ = nullptr;

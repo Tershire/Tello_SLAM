@@ -36,17 +36,17 @@ public:
 
     // member data ////////////////////////////////////////////////////////////
     int aruco_id_; // ArUco marker ID
-    SE3 T_mw_; // marker pose w.r.t the world
+    SE3 T_cm_; // marker pose w.r.t camera
 
 public:
     // constructor & destructor ///////////////////////////////////////////////
     Aruco_Feature() {}
 
-    Aruco_Feature(std::shared_ptr<Frame> frame, const cv::KeyPoint& keypoint, const int& aruco_id, const SE3& T_mw)
+    Aruco_Feature(std::shared_ptr<Frame> frame, const cv::KeyPoint& keypoint, const int& aruco_id, const SE3& T_cm)
         : Feature(frame, keypoint)
     {
         aruco_id_ = aruco_id;
-        T_mw_ = T_mw;
+        T_cm_ = T_cm;
     }
 
     // getter =================================================================
@@ -55,9 +55,9 @@ public:
         return aruco_id_;
     }
 
-    SE3 get_T_mw()
+    SE3 get_T_cm()
     {
-        return T_mw_;
+        return T_cm_;
     }
 };
 
