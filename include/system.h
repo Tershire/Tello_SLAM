@@ -34,18 +34,8 @@ class System
 public:
     typedef std::shared_ptr<System> Ptr;
 
-    // state member ///////////////////////////////////////////////////////////
-    enum Mode
-    {
-        TEST,
-        MISSION
-    };
-
     // member data ////////////////////////////////////////////////////////////
-    // mode ===================================================================
-    Mode mode_;
-
-    // verbosity ==============================================================
+    std::string input_mode_;
     bool verbose_;
 
     // constructor & destructor ///////////////////////////////////////////////
@@ -82,15 +72,10 @@ private:
     Setting::Ptr setting_ = nullptr;
 
     // camera -----------------------------------------------------------------
-    Camera::Ptr usb_camera_;
-    Camera::Ptr raspberry_camera_;
-    Camera::Ptr color_imager_;
-    std::vector<Camera::Ptr> depth_imagers_;
-    
+    std::string mono_camera_to_use_;
     Camera::Ptr mono_camera_;
-    std::string mono_camera_type_;
-    float mono_camera_scale_factor_;
-    float input_resize_factor_;   
+
+    float pre_resize_factor_;
 
     // system components ======================================================
     ArUco_Detector::Ptr aruco_detector_ = nullptr;

@@ -164,7 +164,7 @@ bool Door_Detector::run()
         
         // pre-processing /////////////////////////////////////////////////////
         // resize
-        cv::resize(image, image, cv::Size(), input_resize_factor_, input_resize_factor_, cv::INTER_LINEAR);
+        cv::resize(image, image, cv::Size(), pre_resize_factor_, pre_resize_factor_, cv::INTER_LINEAR);
 
         // apply blur filter (to reduce noise)
         cv::blur(image, image, cv::Size(3, 3)); // Sobel

@@ -36,11 +36,16 @@ Setting::Setting(const std::string& setting_file_path)
         std::cout << "Loading settings from " << setting_file_path << std::endl;
     }
 
-    read_and_set_usb_camera();
-
-    read_and_set_raspberry_camera();
-
-    read_and_set_color_imager();
+    if (mono_camera_to_use_ == "tello")
+    {
+        read_and_set_tello_camera();
+    }
+    else if (mono_camera_to_use_ == "usb")
+    {
+        read_and_set_usb_camera();
+    }
+    else
+        std::cout << "ERROR: no such mono camera to use" << std::endl;
 }
 
 // private XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -159,6 +164,55 @@ cv::Mat Setting::read_parameter<cv::Mat>(cv::FileStorage& file,
 }
 
 // read camera ================================================================
+// Tello ----------------------------------------------------------------------
+void Setting::read_and_set_tello_camera()
+{
+    bool found;
+    std::vector<cv::Mat> intrinsic_parameters;
+
+    // read camera model
+    std::string camera_model = read_parameter<std::string>(file_, "Tello.camera_model", found);
+
+    if (camera_model == "Pinhole")
+    {
+        std::cout << "setting pinhole Tello camera..." << std::endl;
+
+        // read camera intrinsic parameters
+        cv::Mat cameraMatrix = read_parameter<cv::Mat>(file_, "Tello.K", found);
+
+        std::cout << cameraMatrix << std::endl;
+
+        // intrinsics
+        intrinsic_parameters.push_back(cameraMatrix);
+
+        // extrinsics       
+        usb_camera_= std::make_shared<Pinhole>(intrinsic_parameters, SE3(SO3(), Vec3(0, 0, 0)));
+    }
+    else if (camera_model == "Brown-Conrady")
+    {
+        std::cout << "setting Brown-Conrady Tello camera..." << std::endl;
+
+        // read camera intrinsic parameters
+        cv::Mat cameraMatrix = read_parameter<cv::Mat>(file_, "Tello.K", found);
+        cv::Mat distCoeffs = read_parameter<cv::Mat>(file_, "Tello.D", found);
+
+        std::cout << cameraMatrix << std::endl;
+        
+        // intrinsics
+        intrinsic_parameters.push_back(cameraMatrix);
+        intrinsic_parameters.push_back(distCoeffs);
+
+        // extrinsics       
+        tello_camera_= std::make_shared<Brown_Conrady>(intrinsic_parameters, SE3(SO3(), Vec3(0, 0, 0)));
+    }
+    else
+    {
+        std::cerr << "ERROR: " << camera_model << " not known" << std::endl;
+        exit(-1);
+    }
+    std::cout << "\t-loaded Tello camera" << std::endl;
+}
+
 // USB ------------------------------------------------------------------------
 void Setting::read_and_set_usb_camera()
 {
@@ -170,7 +224,7 @@ void Setting::read_and_set_usb_camera()
 
     if (camera_model == "Pinhole")
     {
-        std::cout << "Setting Pinhole USB camera..." << std::endl;
+        std::cout << "setting pinhole USB camera..." << std::endl;
 
         // read camera intrinsic parameters
         cv::Mat cameraMatrix = read_parameter<cv::Mat>(file_, "USB.K", found);
@@ -185,7 +239,7 @@ void Setting::read_and_set_usb_camera()
     }
     else if (camera_model == "Brown-Conrady")
     {
-        std::cout << "Setting Brown-Conrady USB camera..." << std::endl;
+        std::cout << "setting Brown-Conrady USB camera..." << std::endl;
 
         // read camera intrinsic parameters
         cv::Mat cameraMatrix = read_parameter<cv::Mat>(file_, "USB.K", found);
@@ -202,116 +256,10 @@ void Setting::read_and_set_usb_camera()
     }
     else
     {
-        std::cerr << "Error: " << camera_model << " not known" << std::endl;
+        std::cerr << "ERROR: " << camera_model << " not known" << std::endl;
         exit(-1);
     }
-    std::cout << "\t-Loaded USB camera" << std::endl;
-}
-
-// raspberry ------------------------------------------------------------------
-void Setting::read_and_set_raspberry_camera()
-{
-    bool found;
-    std::vector<cv::Mat> intrinsic_parameters;
-
-    // read camera model
-    std::string camera_model = read_parameter<std::string>(file_, "raspberry.camera_model", found);
-
-    if (camera_model == "Pinhole")
-    {
-        std::cout << "Setting Pinhole raspberry camera..." << std::endl;
-
-        // read camera intrinsic parameters
-        cv::Mat cameraMatrix = read_parameter<cv::Mat>(file_, "raspberry.K", found);
-
-        std::cout << cameraMatrix << std::endl;
-
-        // intrinsics
-        intrinsic_parameters.push_back(cameraMatrix);
-
-        // extrinsics       
-        raspberry_camera_= std::make_shared<Pinhole>(intrinsic_parameters, SE3(SO3(), Vec3(0, 0, 0)));
-    }
-    else if (camera_model == "Brown-Conrady")
-    {
-        std::cout << "Setting Brown-Conrady raspberry camera..." << std::endl;
-
-        // read camera intrinsic parameters
-        cv::Mat cameraMatrix = read_parameter<cv::Mat>(file_, "raspberry.K", found);
-        cv::Mat distCoeffs = read_parameter<cv::Mat>(file_, "raspberry.D", found);
-
-        std::cout << cameraMatrix << std::endl;
-        
-        // intrinsics
-        intrinsic_parameters.push_back(cameraMatrix);
-        intrinsic_parameters.push_back(distCoeffs);
-
-        // extrinsics       
-        raspberry_camera_= std::make_shared<Brown_Conrady>(intrinsic_parameters, SE3(SO3(), Vec3(0, 0, 0)));
-    }
-    else
-    {
-        std::cerr << "Error: " << camera_model << " not known" << std::endl;
-        exit(-1);
-    }
-    std::cout << "\t-Loaded raspberry camera" << std::endl;
-}
-
-// realsense ------------------------------------------------------------------
-void Setting::read_and_set_color_imager()
-{
-    bool found;
-    std::vector<cv::Mat> intrinsic_parameters;
-
-    // read camera model
-    std::string camera_model = read_parameter<std::string>(file_, "color_imager.camera_model", found);
-
-    if (camera_model == "Pinhole")
-    {
-        std::cout << "Setting Pinhole color imager..." << std::endl;
-
-        // read camera intrinsic parameters
-        cv::Mat cameraMatrix = read_parameter<cv::Mat>(file_, "color_imager.K", found);
-
-        std::cout << cameraMatrix << std::endl;
-
-        // intrinsics
-        intrinsic_parameters.push_back(cameraMatrix);
-
-        // extrinsics       
-        color_imager_= std::make_shared<Pinhole>(intrinsic_parameters, SE3(SO3(), Vec3(0, 0, 0)));
-    }
-    else if (camera_model == "Brown-Conrady")
-    {
-        std::cout << "Setting Brown-Conrady color imager..." << std::endl;
-
-        // read camera intrinsic parameters
-        cv::Mat cameraMatrix = read_parameter<cv::Mat>(file_, "color_imager.K", found);
-        cv::Mat distCoeffs = read_parameter<cv::Mat>(file_, "color_imager.D", found);
-
-        std::cout << cameraMatrix << std::endl;
-        
-        // intrinsics
-        intrinsic_parameters.push_back(cameraMatrix);
-        intrinsic_parameters.push_back(distCoeffs);
-
-        // extrinsics       
-        color_imager_= std::make_shared<Brown_Conrady>(intrinsic_parameters, SE3(SO3(), Vec3(0, 0, 0)));
-    }
-    else
-    {
-        std::cerr << "Error: " << camera_model << " not known" << std::endl;
-        exit(-1);
-    }
-    std::cout << "\t-Loaded color imager" << std::endl;
-}
-
-void Setting::read_and_set_depth_imagers(const int& num_cameras)
-{
-    // (!) NOT YET IMPLEMENTED
-    for (int camera_id = 0; camera_id < num_cameras; ++camera_id)
-    {
-    }
+    std::cout << "\t-loaded USB camera" << std::endl;
 }
 
 } // namespace tello_slam

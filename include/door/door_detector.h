@@ -41,7 +41,7 @@ public:
 
     // member data ////////////////////////////////////////////////////////////
     bool verbose_;
-    float input_resize_factor_;
+    float pre_resize_factor_;
 
     // neural net =============================================================
     std::map<unsigned int, std::string> classes_;
@@ -66,7 +66,7 @@ public:
     // port -------------------------------------------------------------------
     void set_input_mode(const Input_Mode& input_mode) {input_mode_ = input_mode;}
     void set_verbose(const bool& verbose) {verbose_ = verbose;}
-    void set_input_resize_factor(const float& input_resize_factor) {input_resize_factor_ = input_resize_factor;}
+    void set_pre_resize_factor(const float& pre_resize_factor) {pre_resize_factor_ = pre_resize_factor;}
 
     // member methods /////////////////////////////////////////////////////////
     /**

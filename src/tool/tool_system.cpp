@@ -39,34 +39,36 @@ bool Tool_System::initialize()
     else
         verbose_ = true;
 
+    input_mode_ = Config::read<std::string>("input_mode");
+    mono_camera_to_use_ = Config::read<std::string>("mono_camera_to_use");
+    std::cout << "mono camera to use: " << mono_camera_to_use_ << std::endl;
+
     // port ===================================================================
     setting_ = std::make_shared<Setting>(Config::read<std::string>("setting_file_path"));
+    setting_->set_mono_camera_to_use(mono_camera_to_use_);
 
-    // load camera ------------------------------------------------------------
-    usb_camera_ = setting_->get_usb_camera();
-    color_imager_ = setting_->get_color_imager();
-
-    // set mono camera --------------------------------------------------------
-    mono_camera_type_ = Config::read<std::string>("mono_camera_type");
-    std::cout << "mono_camera_type_: " << mono_camera_type_ << std::endl;
-
-    if (mono_camera_type_ == "usb")
-        mono_camera_ = usb_camera_;
-    else if (mono_camera_type_ == "raspberry")
-        mono_camera_ = raspberry_camera_;
+    // get and set mono camera ------------------------------------------------
+    if (mono_camera_to_use_ == "tello")
+    {
+        mono_camera_ = setting_->get_tello_camera();
+    }
+    else if (mono_camera_to_use_ == "usb")
+    {
+        mono_camera_ = setting_->get_usb_camera();
+    }
     else
-        std::cout << "ERROR: no such mono camera type..." << std::endl;
+        std::cout << "ERROR: no such mono camera to use" << std::endl;
 
-    // rescale ----------------------------------------------------------------
-    mono_camera_scale_factor_ = Config::read<float>("mono_camera_scale_factor");
-    mono_camera_->rescale(mono_camera_scale_factor_);
+    // pre-rescale ------------------------------------------------------------
+    pre_resize_factor_ = Config::read<float>("pre_resize_factor");
+    mono_camera_->rescale(pre_resize_factor_);
     
-    // create system components ===============================================
-    int target_id = 0; // initial value
-    
+    // create system components ===============================================   
     // ArUco detector ---------------------------------------------------------
     predifined_dictionary_name_ = Config::read<std::string>("predifined_dictionary_name");
     marker_length_ = Config::read<float>("marker_length");
+    
+    int target_id = 0; // initial value
     aruco_detector_ = std::make_shared<ArUco_Detector>(
         target_id, predifined_dictionary_name_, marker_length_, mono_camera_);
     aruco_detector_->set_verbose(verbose);

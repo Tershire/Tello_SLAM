@@ -28,7 +28,7 @@ video_file_path: /home/tershire/Videos/doors/matrix-backdoors.mp4
 tello_video_stream: "udp://0.0.0.0:11111"  # "" os meeded
 
 # image size
-input_resize_factor: 0.5
+pre_resize_factor: 0.5
 mono_camera_scale_factor: 1.0
 
 # Output //////////////////////////////////////////////////////////////////////
@@ -36,7 +36,7 @@ resize_scale_factor: 1.25
 
 # System //////////////////////////////////////////////////////////////////////
 # which camera type is used for the mono camera: usb, raspberry
-mono_camera_type: usb
+mono_camera_to_use: usb
 
 # Aruco Detector //////////////////////////////////////////////////////////////
 target_ID: 0
