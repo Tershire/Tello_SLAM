@@ -24,7 +24,7 @@ using namespace tello_slam;
 int main(int argc, char **argv)
 {
     // configure system =======================================================
-    std::string configuration_file_path = "./config/vision_system_config.yaml";
+    std::string configuration_file_path = "./config/system_config.yaml";
     
     Tool_System::Ptr tool_system = std::make_shared<Tool_System>(configuration_file_path);    
     assert(tool_system->initialize() == true);

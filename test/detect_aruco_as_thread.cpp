@@ -23,7 +23,7 @@ using namespace tello_slam;
 
 int main(int argc, char **argv)
 {
-    std::string configuration_file_path = "./config/vision_system_config.yaml";
+    std::string configuration_file_path = "./config/system_config.yaml";
     
     System::Ptr vision_system = std::make_shared<System>(configuration_file_path);    
     assert(vision_system->initialize() == true);

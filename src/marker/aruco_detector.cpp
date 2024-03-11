@@ -79,12 +79,8 @@ ArUco_Detector::ArUco_Detector(const int& target_id,
     else
         std::cout << "ERROR: input mode wrong\n";
 
+    pre_resize_factor_ = Config::read<float>("pre_resize_factor");
     resize_scale_factor_ = Config::read<float>("resize_scale_factor");
-
-    mono_camera_scale_factor_ = Config::read<float>("mono_camera_scale_factor");
-
-    // data collection ========================================================
-    csv_file_name_ = Config::read<std::string>("csv_file_name");
 }
 
 // member methods /////////////////////////////////////////////////////////////
@@ -247,7 +243,7 @@ bool ArUco_Detector::run()
             input_mode_ == RASPBERRY)
         {
             cv::resize(image, image, cv::Size(), 
-                mono_camera_scale_factor_, mono_camera_scale_factor_, cv::INTER_LINEAR);
+                pre_resize_factor_, pre_resize_factor_, cv::INTER_LINEAR);
         }
         
         // pre-processing /////////////////////////////////////////////////////

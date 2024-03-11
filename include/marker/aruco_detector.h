@@ -119,14 +119,9 @@ private:
 
     // port ===================================================================
     Input_Mode input_mode_;
+    
+    float pre_resize_factor_;
     float resize_scale_factor_;
-
-    float mono_camera_scale_factor_;
-
-    // data collection ========================================================
-    long t_;
-    std::ofstream ofstream_;
-    std::string csv_file_name_;
 
     // member methods /////////////////////////////////////////////////////////
     inline double compute_pose_error(SE3 T_cm)
