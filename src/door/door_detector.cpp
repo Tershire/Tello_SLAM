@@ -66,7 +66,7 @@ Door_Detector::Door_Detector(Camera::Ptr camera)
     std::string names_path = Config::read<std::string>("names_path");
     classes_ = get_classes(names_path);
 
-    std::cout << "\t-Loaded neural net" << std::endl;
+    std::cout << "\t-loaded neural net" << std::endl;
 
     // tracking ===============================================================
     tracker_ = cv::TrackerCSRT::create();

@@ -41,7 +41,6 @@ bool System::initialize()
 
     input_mode_ = Config::read<std::string>("input_mode");
     mono_camera_to_use_ = Config::read<std::string>("mono_camera_to_use");
-    std::cout << "mono camera to use: " << mono_camera_to_use_ << std::endl;
 
     // port ===================================================================
     setting_ = std::make_shared<Setting>(Config::read<std::string>("setting_file_path"));
@@ -61,6 +60,8 @@ bool System::initialize()
     // pre-rescale ------------------------------------------------------------
     pre_resize_factor_ = Config::read<float>("pre_resize_factor");
     mono_camera_->rescale(pre_resize_factor_);
+
+    std::cout << "\t-set mono camera: " << mono_camera_to_use_ << std::endl;
     
     // create vision system components ========================================
     // ArUco Detector ---------------------------------------------------------

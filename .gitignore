@@ -39,7 +39,7 @@ bin/
 
 # config
 *configuration.yaml
-vision_system_config.yaml
+system_config.yaml
 
 # setting
 *setting.yaml

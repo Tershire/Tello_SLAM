@@ -39,7 +39,7 @@ void Camera::rescale(const float& scale_factor)
 {
     cameraMatrix_ *= scale_factor;
 
-    std::cout << "cameraMatrix_: " << cameraMatrix_ << std::endl;
+    std::cout << "\ncameraMatrix_: " << cameraMatrix_ << std::endl;
 
     fx_ = cameraMatrix_.at<double>(0, 0);
     fy_ = cameraMatrix_.at<double>(1, 1);
