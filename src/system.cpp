@@ -121,6 +121,7 @@ void System::run()
 bool System::step()
 {
     // load next frame
+    // (TODO) integrate Data_Stream to Dataset to reduce switches.
     Frame::Ptr frame;
     switch (input_mode_)
     {
