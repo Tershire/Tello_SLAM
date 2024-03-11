@@ -15,6 +15,10 @@
 #define TELLOSLAM_SYSTEM_H
 
 #include "common.h"
+#include "frontend.h"
+#include "backend.h"
+#include "viewer.h"
+#include "dataset.h"
 #include "port/setting.h"
 #include "camera/camera.h"
 #include "marker/aruco_detector.h"
@@ -43,6 +47,11 @@ public:
 
     // getter & setter ////////////////////////////////////////////////////////
     // getter =================================================================
+    Frontend::Tracking_Status get_tracking_status() const 
+    {
+      return frontend_->get_tracking_status();
+    }
+    
     ArUco_Detector::Ptr get_aruco_detector() const {return aruco_detector_;}
     IMU_Reader::Ptr get_imu_reader() const {return imu_reader_;}
     Door_Detector::Ptr get_door_detector() const {return door_detector_;}
@@ -64,12 +73,18 @@ public:
      */
     void run_roll_reader();
 
+    /**
+     * step forward in dataset
+     */
+    bool step();
+
 private:
     // member data ////////////////////////////////////////////////////////////
     std::string configuration_file_path_;
     
     // port ===================================================================
     Setting::Ptr setting_ = nullptr;
+    Dataset::Ptr dataset_ = nullptr;
 
     // camera -----------------------------------------------------------------
     std::string mono_camera_to_use_;
@@ -78,6 +93,11 @@ private:
     float pre_resize_factor_;
 
     // system components ======================================================
+    Frontend::Ptr frontend_ = nullptr;
+    Backend::Ptr backend_ = nullptr;
+    Map::Ptr map_ = nullptr;
+    Viewer::Ptr viewer_ = nullptr;
+    
     ArUco_Detector::Ptr aruco_detector_ = nullptr;
     IMU_Reader::Ptr imu_reader_ = nullptr;
     Door_Detector::Ptr door_detector_ = nullptr;

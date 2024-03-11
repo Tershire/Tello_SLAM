@@ -137,6 +137,11 @@ private:
      * 
      */
     int detect_aruco_features();
+
+    /**
+     * 
+     */
+    int compute_aruco_poses();
 };
 
 } // namespace tello_slam

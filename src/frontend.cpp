@@ -86,24 +86,7 @@ bool Frontend::initialize()
 // ----------------------------------------------------------------------------
 bool Frontend::build_initial_map()
 {
-    SE3 T_wc = current_frame_->get_T_cw().inverse();
-            
-    int num_initial_aruco_landmarks = 0;
-    for (size_t i = 0; i < current_frame_->aruco_features_.size(); ++i)
-    {
-        SE3 T_cm = current_frame_->aruco_features_[i]->T_cm_;
-        Vec3 p3D_camera = T_cm.translation();
-
-        auto aruco_landmark = ArUco_Landmark::create_aruco_landmark();
-        aruco_landmark->set_position(T_wc * p3D_camera);
-        aruco_landmark->set_T_wm(T_wc * T_cm);
-        aruco_landmark->add_observation(current_frame_->features_[i]);
-        current_frame_->aruco_features_[i]->aruco_landmark_ = aruco_landmark;
-        
-        map_->insert_landmark(aruco_landmark);
-
-        num_initial_aruco_landmarks += 1;
-    }
+    int num_aruco_landmarks = compute_aruco_poses();
 
     current_frame_->set_as_keyframe();
     map_->insert_keyframe(current_frame_);
@@ -114,7 +97,7 @@ bool Frontend::build_initial_map()
     // backend_->update_map();
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    std::cout << "initial map created with " << num_initial_aruco_landmarks
+    std::cout << "initial map created with " << num_aruco_landmarks
         << " map points" << std::endl;
 
     // viewer -----------------------------------------------------------------
@@ -182,10 +165,10 @@ bool Frontend::build_reset_map()
 bool Frontend::track()
 {
     // constant velocity assumption
-    if (previous_frame_)
-    {
-        current_frame_->set_T_cw(T_CurrPrev_ * previous_frame_->get_T_cw());
-    }
+    // if (previous_frame_)
+    // {
+    //     current_frame_->set_T_cw(T_CurrPrev_ * previous_frame_->get_T_cw());
+    // }
 
     // detect ArUco
     int num_detected_aruco_features = detect_aruco_features();
@@ -202,8 +185,22 @@ bool Frontend::track()
         insert_keyframe();
     }
 
+    // compute and update T_cw
+    SE3 T_cm, T_wm;
+    for (auto& aruco_feature : current_frame_->aruco_features_)
+    {
+        auto aruco_landmark = aruco_feature->aruco_landmark_.lock();
+        if (aruco_landmark)
+        {
+            T_cm = aruco_feature->get_T_cm();
+            T_wm = aruco_landmark->get_T_wm();
+
+            current_frame_->set_T_cw(T_cm * T_wm.inverse());
+        }
+    }
+
     // compute pose difference
-    T_CurrPrev_ = current_frame_->get_T_cw() * previous_frame_->get_T_cw().inverse();
+    // T_CurrPrev_ = current_frame_->get_T_cw() * previous_frame_->get_T_cw().inverse();
 
     // deduce current instantaneous velocity
     if (motion_log_on_)
@@ -258,6 +255,8 @@ bool Frontend::insert_keyframe()
               << current_frame_->keyframe_id_ << std::endl;
 
     add_observation();
+
+    compute_aruco_poses();
 
     // update backend because we have a new keyframe
     
@@ -319,6 +318,31 @@ int Frontend::detect_aruco_features()
     }
 
     return num_aruco_features_detected;
+}
+
+// ----------------------------------------------------------------------------
+int Frontend::compute_aruco_poses()
+{
+    SE3 T_wc = current_frame_->get_T_cw().inverse();
+            
+    int num_aruco_landmarks = 0;
+    for (size_t i = 0; i < current_frame_->aruco_features_.size(); ++i)
+    {
+        SE3 T_cm = current_frame_->aruco_features_[i]->T_cm_;
+        Vec3 p3D_camera = T_cm.translation();
+
+        auto aruco_landmark = ArUco_Landmark::create_aruco_landmark();
+        aruco_landmark->set_position(T_wc * p3D_camera);
+        aruco_landmark->set_T_wm(T_wc * T_cm);
+        aruco_landmark->add_observation(current_frame_->features_[i]);
+        current_frame_->aruco_features_[i]->aruco_landmark_ = aruco_landmark;
+        
+        map_->insert_landmark(aruco_landmark);
+
+        num_aruco_landmarks += 1;
+    }
+
+    return num_aruco_landmarks;
 }
 
 } // namespace tello_slam

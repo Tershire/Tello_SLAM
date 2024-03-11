@@ -83,11 +83,48 @@ bool System::initialize()
 }
 
 // member methods /////////////////////////////////////////////////////////////
-// ----------------------------------------------------------------------------
 void System::run()
 {
-    std::cout << "System: initiate" << std::endl;
-    std::cout << "System: exit" << std::endl;
+    std::cout << "Tello SLAM: initiate" << std::endl;
+
+    while (true)
+    {
+        if (step() == false)
+        {
+            break;
+        }
+    }
+
+    // backend_->close(); // (TODO) enable when backend is completed
+    if (viewer_) 
+    {
+        viewer_ ->close();
+    }
+
+    std::cout << "Tello SLAM: exit" << std::endl;
+}
+
+// ----------------------------------------------------------------------------
+bool System::step()
+{
+    // load next frame
+    Frame::Ptr frame = dataset_->load_next_frame();
+    if (frame == nullptr) return false;
+
+    // timer ------------------------------------------------------------------
+    // auto t1 = std::chrono::steady_clock::now();
+    // ------------------------------------------------------------------------
+
+    bool success = frontend_->step(frame);
+    
+    // timer ------------------------------------------------------------------
+    // auto t2 = std::chrono::steady_clock::now();
+    // auto time_used =
+    //     std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
+    // LOG(INFO) << "VO cost time: " << time_used.count() << " seconds.";
+    // ------------------------------------------------------------------------
+
+    return success;
 }
 
 } // namespace tello_slam
