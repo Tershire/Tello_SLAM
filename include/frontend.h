@@ -21,6 +21,7 @@
 #include "common.h"
 #include "frame.h"
 #include "map.h"
+#include "aruco_detector.h"
 
 
 namespace tello_slam
@@ -131,6 +132,11 @@ private:
      * 
      */
     void add_observation();
+
+    /**
+     * 
+     */
+    int detect_aruco_features();
 };
 
 } // namespace tello_slam

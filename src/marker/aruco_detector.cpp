@@ -99,7 +99,7 @@ bool ArUco_Detector::detect(cv::Mat& image, std::vector<int>& ids,
 }
 
 // ----------------------------------------------------------------------------
-bool ArUco_Detector::estimate_pose(std::vector<int>& ids, 
+bool ArUco_Detector::estimate_poses(std::vector<int>& ids, 
     std::vector<std::vector<cv::Point2f>>& p2Dss_pixel,
     std::vector<SE3>& Ts_cm)
 {

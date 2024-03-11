@@ -75,7 +75,7 @@ public:
     bool detect(cv::Mat& image, std::vector<int>& ids, 
         std::vector<std::vector<cv::Point2f>>& p2Dss_pixel);
 
-    bool estimate_pose(std::vector<int>& ids, 
+    bool estimate_poses(std::vector<int>& ids, 
         std::vector<std::vector<cv::Point2f>>& p2Dss_pixel,
         std::vector<SE3>& Ts_cm);
 

@@ -12,8 +12,11 @@ add_library(tello_slam SHARED
     port/setting.cpp
     tool/supervisor.cpp
     tool/tool_system.cpp
+    backend.cpp
+    frontend.cpp
     map.cpp
-    system.cpp)
+    system.cpp
+    viewer.cpp)
 
 target_link_libraries(tello_slam 
     ${THIRD_PARTY_LIBS})

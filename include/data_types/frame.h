@@ -25,7 +25,7 @@ namespace tello_slam
 
 struct Landmark;
 struct Feature;
-struct Aruco_Feature;
+struct ArUco_Feature;
 
 /**
  * each frame has a unique frame ID
@@ -47,7 +47,7 @@ public:
     SE3 T_cw_; // camera pose w.r.t the world
     cv::Mat image_; // image
     std::vector<std::shared_ptr<Feature>> features_;
-    std::vector<std::shared_ptr<Aruco_Feature>> aruco_features_;
+    std::vector<std::shared_ptr<ArUco_Feature>> aruco_features_;
 
     std::mutex T_cw_mutex_; // pose data mutex
 

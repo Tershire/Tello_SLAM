@@ -22,10 +22,12 @@
 namespace tello_slam
 {
 
+struct ArUco_Feature;
+
 /**
  * representation of a ArUco landmark as a 6D pose.
  */
-struct ArUco_Landmark : public Landmark
+struct ArUco_Landmark: public Landmark
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
@@ -64,7 +66,19 @@ public:
     {
         std::unique_lock<std::mutex> lock(T_wm_mutex_);
         T_wm_ = T_wm;
-    };
+    }
+
+    // static methods /////////////////////////////////////////////////////////
+    // factory function =======================================================
+    static ArUco_Landmark::Ptr create_aruco_landmark()
+    {
+        static long factory_id = 0;
+
+        ArUco_Landmark::Ptr aruco_landmark(new ArUco_Landmark);
+        aruco_landmark->id_ = factory_id += 1;
+
+        return aruco_landmark;
+    }
 };
 
 } // namespace tello_slam

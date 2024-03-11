@@ -18,6 +18,7 @@
 #include "backend.h"
 #include "config.h"
 #include "feature.h"
+#include "aruco_feature.h"
 #include "frontend.h"
 #include "map.h"
 #include "viewer.h"
@@ -34,7 +35,7 @@ Frontend::Frontend()
 }
 
 // member_methods /////////////////////////////////////////////////////////////
-bool Frontend::step(vo::Frame::Ptr frame)
+bool Frontend::step(Frame::Ptr frame)
 {
     current_frame_ = frame;
 
@@ -87,15 +88,15 @@ bool Frontend::build_initial_map()
 {
     SE3 T_wc = current_frame_->get_T_cw().inverse();
             
-    num_initial_aruco_landmarks = 0;
+    int num_initial_aruco_landmarks = 0;
     for (size_t i = 0; i < current_frame_->aruco_features_.size(); ++i)
     {
-        SE T_cm = current_frame_->aruco_features_[i]->T_cm_;
+        SE3 T_cm = current_frame_->aruco_features_[i]->T_cm_;
         Vec3 p3D_camera = T_cm.translation();
 
-        auto aruco_landmark = ArUco_Landmark::create_landmark();
+        auto aruco_landmark = ArUco_Landmark::create_aruco_landmark();
         aruco_landmark->set_position(T_wc * p3D_camera);
-        aruco_landmark->set_T_wm(T_wc * T_cm)
+        aruco_landmark->set_T_wm(T_wc * T_cm);
         aruco_landmark->add_observation(current_frame_->features_[i]);
         current_frame_->aruco_features_[i]->aruco_landmark_ = aruco_landmark;
         
@@ -113,7 +114,7 @@ bool Frontend::build_initial_map()
     // backend_->update_map();
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    std::cout << "initial map created with " << num_initial_landmarks
+    std::cout << "initial map created with " << num_initial_aruco_landmarks
         << " map points" << std::endl;
 
     // viewer -----------------------------------------------------------------
@@ -145,6 +146,39 @@ bool Frontend::build_initial_map()
 }
 
 // ----------------------------------------------------------------------------
+bool Frontend::reset()
+{
+    // NOT_IMPLEMENTED_YET
+    std::cout << "////////// <!><!><!><!> TRACKING LOST <!><!><!><!> //////////" << std::endl;
+
+    int num_detected_aruco_features = detect_aruco_features();
+    if (num_detected_aruco_features < 1)
+    {
+        std::cout << "could not reset frontend" << std::endl;
+        return false;
+    }
+
+    bool reset_map_built = build_reset_map();
+    if (reset_map_built)
+    {
+        tracking_status_ = Tracking_Status::OK;
+        if (viewer_)
+        {
+            viewer_->set_current_frame(current_frame_);
+            viewer_->request_update_map();
+        }
+        return true;
+    }
+    return false;
+}
+
+// ----------------------------------------------------------------------------
+bool Frontend::build_reset_map()
+{
+    return true;
+}
+
+// ----------------------------------------------------------------------------
 bool Frontend::track()
 {
     // constant velocity assumption
@@ -168,7 +202,7 @@ bool Frontend::track()
         insert_keyframe();
     }
 
-    // compute estimate relative pose
+    // compute pose difference
     T_CurrPrev_ = current_frame_->get_T_cw() * previous_frame_->get_T_cw().inverse();
 
     // deduce current instantaneous velocity
@@ -252,96 +286,39 @@ void Frontend::add_observation()
         auto landmark = feature->landmark_.lock();
         if (landmark) landmark->add_observation(feature);
     }
+
+    for (auto& aruco_feature : current_frame_->aruco_features_)
+    {
+        auto aruco_landmark = aruco_feature->aruco_landmark_.lock();
+        if (aruco_landmark) aruco_landmark->add_observation(aruco_feature);
+    }
 }
 
 // ----------------------------------------------------------------------------
 int Frontend::detect_aruco_features()
 {
+    // detect
+    std::vector<int> aruco_ids;
+    std::vector<std::vector<cv::Point2f>> corner_keypointss;
+    aruco_detector_->detect(current_frame_->image_, aruco_ids, corner_keypointss);
+
+    // estimate poses
+    std::vector<SE3> Ts_cm;
+    aruco_detector_->estimate_poses(aruco_ids, corner_keypointss, Ts_cm);
+
+    // register features to current frame
+    int num_aruco_features_detected = 0;
+    for (size_t i = 0; i < aruco_ids.size(); ++i)
+    {
+        ArUco_Feature::Ptr aruco_feature(new ArUco_Feature(current_frame_, 
+            cv::KeyPoint(NAN, NAN, 1), aruco_ids[i], corner_keypointss[i], Ts_cm[i]));
+        
+        current_frame_->aruco_features_.push_back(aruco_feature);
+
+        num_aruco_features_detected += 1;
+    }
 
     return num_aruco_features_detected;
 }
-
-// ----------------------------------------------------------------------------
-bool Frontend::reset()
-{
-    // NOT_IMPLEMENTED_YET
-    std::cout << "////////// <!><!><!><!> TRACKING LOST <!><!><!><!> //////////" << std::endl;
-
-    int num_detected_aruco_features = detect_aruco_features();
-    if (num_detected_aruco_features < 1)
-    {
-        std::cout << "could not reset frontend" << std::endl;
-        return false;
-    }
-
-    bool reset_map_built = build_reset_map();
-    if (reset_map_built)
-    {
-        tracking_status_ = Tracking_Status::OK;
-        if (viewer_)
-        {
-            viewer_->set_current_frame(current_frame_);
-            viewer_->request_update_map();
-        }
-        return true;
-    }
-    return false;
-}
-
-// ----------------------------------------------------------------------------
-bool Frontend::build_reset_map()
-{
-    std::vector<SE3> T_cNcs_LR{camera_L_->get_T_cNc(), camera_R_->get_T_cNc()};
-
-    // regard the current pose estimation is wrong, so take the pose of the previous frame
-    SE3 current_T_wc = previous_frame_->get_T_cw().inverse(); 
-    // ^ (TO DO) may need to consider elapsed time during the previous frame to the current frame, assuming constant velocity maybe
-    T_CurrPrev_ = SE3(); // assume no relative motion
-    
-    size_t num_reset_landmarks = 0;
-    for (size_t i = 0; i < current_frame_->features_L_.size(); ++i)
-    {
-    }
-
-    current_frame_->set_as_keyframe();
-    map_->insert_keyframe(current_frame_);
-
-    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    // (TO DO) uncomment backend update for extending VO to SLAM
-    // update backend because we have a new keyframe
-    // backend_->update_map();
-    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-    std::cout << "reset map created with " << num_reset_landmarks
-        << " map points" << std::endl;
-
-    // viewer -----------------------------------------------------------------
-    if (viewer_) 
-    {
-        viewer_->set_current_frame(current_frame_);
-        viewer_->request_update_map();
-        // --------------------------------------------------------------------
-        // viewer: step by step control
-        if (viewer_->do_pause_)
-        {
-            std::cout << "paused: waiting..." << std::endl;
-            while (viewer_->do_pause_)
-            {
-                usleep(500);
-
-                if (viewer_->step_to_next_frame_)
-                {
-                    std::cout << "stepping to the next frame..." << std::endl;
-                    break;
-                }
-            }
-        }
-        // --------------------------------------------------------------------
-    }
-    // ------------------------------------------------------------------------
-
-    return true;
-}
-
 
 } // namespace tello_slam
