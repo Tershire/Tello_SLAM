@@ -45,7 +45,6 @@ bool System::initialize()
 
     // port ===================================================================
     setting_ = std::make_shared<Setting>(Config::read<std::string>("setting_file_path"));
-    setting_->set_mono_camera_to_use(mono_camera_to_use_);
 
     // get and set mono camera ------------------------------------------------
     if (mono_camera_to_use_ == "tello")

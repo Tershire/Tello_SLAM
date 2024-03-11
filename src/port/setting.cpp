@@ -25,27 +25,19 @@ Setting::Setting(const std::string& setting_file_path)
     file_ = cv::FileStorage(setting_file_path, cv::FileStorage::READ);
     if (!file_.isOpened())
     {
-        std::cerr << "[ERROR]: could not open setting file at: " 
+        std::cerr << "ERROR: could not open setting file at: " 
                   << setting_file_path << std::endl;
-        std::cerr << "Aborting..." << std::endl;
+        std::cerr << "aborting..." << std::endl;
 
         exit(-1);
     }
     else
     {
-        std::cout << "Loading settings from " << setting_file_path << std::endl;
+        std::cout << "loading settings from " << setting_file_path << std::endl;
     }
 
-    if (mono_camera_to_use_ == "tello")
-    {
-        read_and_set_tello_camera();
-    }
-    else if (mono_camera_to_use_ == "usb")
-    {
-        read_and_set_usb_camera();
-    }
-    else
-        std::cout << "ERROR: no such mono camera to use" << std::endl;
+    read_and_set_tello_camera();
+    read_and_set_usb_camera();
 }
 
 // private XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

@@ -41,15 +41,9 @@ public:
     Camera::Ptr get_tello_camera() const {return tello_camera_;}
     Camera::Ptr get_usb_camera() const {return usb_camera_;}
 
-    // setter =================================================================
-    void set_mono_camera_to_use(std::string mono_camera_to_use) {mono_camera_to_use_ = mono_camera_to_use;}
-
 private:
     // member data ////////////////////////////////////////////////////////////
     cv::FileStorage file_;
-
-    // configuration
-    std::string mono_camera_to_use_;
 
     // cameras
     Camera::Ptr tello_camera_;
