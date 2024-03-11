@@ -25,7 +25,7 @@ int main(int argc, char **argv)
     System::Ptr system(new System(configuration_file_path));
     assert(system->initialize() == true);
     
-    std::cout << "Tello SLAM start!" << std::endl;
+    std::cout << "\nTello SLAM: start!" << std::endl;
     system->run();
 
     return 0;

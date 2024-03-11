@@ -55,9 +55,21 @@ bool System::initialize()
 
     // port ===================================================================
     setting_ = std::make_shared<Setting>(Config::read<std::string>("setting_file_path"));
-    dataset_ = std::make_shared<Dataset>(Config::read<std::string>("dataset_directory_path"));
-    data_stream_ = std::make_shared<Data_Stream>();
+    
+    switch (input_mode_)
+    {
+        case TELLO:
+        case USB:
+        case VIDEO:
+        {
+            data_stream_ = std::make_shared<Data_Stream>();
+            break;
+        }
 
+        case DATASET:
+            dataset_ = std::make_shared<Dataset>(Config::read<std::string>("dataset_directory_path"));
+    }
+    
     // get and set mono camera ------------------------------------------------
     if (mono_camera_to_use_ == "tello")
     {
