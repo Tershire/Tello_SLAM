@@ -73,9 +73,6 @@ Data_Stream::Data_Stream()
     // load UNIX timestamps ===================================================
     // to estimate motion data (ex. velocity)
     motion_log_on_ = Config::read<int>("motion_log_on");
-    if (motion_log_on_)
-    {
-    }
 }
 
 // ----------------------------------------------------------------------------
@@ -88,7 +85,7 @@ Frame::Ptr Data_Stream::load_next_frame()
     // check frame
     if (image.empty()) 
     {
-        std::cerr << "ERROR: blank frame\n";
+        std::cerr << "ERROR: blank image\n";
     }
 
     // get timestamp

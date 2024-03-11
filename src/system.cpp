@@ -39,11 +39,24 @@ bool System::initialize()
     else
         verbose_ = true;
 
-    input_mode_ = Config::read<std::string>("input_mode");
+    std::string input_mode = Config::read<std::string>("input_mode");
+    if (input_mode == "tello")
+        input_mode_ = Input_Mode::TELLO;
+    else if (input_mode == "usb")
+        input_mode_ = Input_Mode::USB;
+    else if (input_mode == "video")
+        input_mode_ = Input_Mode::VIDEO;
+    else if (input_mode == "dataset")
+        input_mode_ = Input_Mode::DATASET;
+    else
+        std::cout << "ERROR: input mode wrong\n";
+    
     mono_camera_to_use_ = Config::read<std::string>("mono_camera_to_use");
 
     // port ===================================================================
     setting_ = std::make_shared<Setting>(Config::read<std::string>("setting_file_path"));
+    dataset_ = std::make_shared<Dataset>(Config::read<std::string>("dataset_directory_path"));
+    data_stream_ = std::make_shared<Data_Stream>();
 
     // get and set mono camera ------------------------------------------------
     if (mono_camera_to_use_ == "tello")
@@ -108,7 +121,21 @@ void System::run()
 bool System::step()
 {
     // load next frame
-    Frame::Ptr frame = dataset_->load_next_frame();
+    Frame::Ptr frame;
+    switch (input_mode_)
+    {
+        case TELLO:
+        case USB:
+        case VIDEO:
+        {
+            frame = data_stream_->load_next_frame();
+            break;
+        }
+
+        case DATASET:
+            frame = dataset_->load_next_frame();
+    }
+
     if (frame == nullptr) return false;
 
     // timer ------------------------------------------------------------------

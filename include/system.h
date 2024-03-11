@@ -19,6 +19,7 @@
 #include "backend.h"
 #include "viewer.h"
 #include "dataset.h"
+#include "data_stream.h"
 #include "port/setting.h"
 #include "camera/camera.h"
 #include "marker/aruco_detector.h"
@@ -38,8 +39,17 @@ class System
 public:
     typedef std::shared_ptr<System> Ptr;
 
+    // state member ///////////////////////////////////////////////////////////
+    enum Input_Mode
+    {
+        TELLO,
+        USB,
+        VIDEO,
+        DATASET
+    };
+
     // member data ////////////////////////////////////////////////////////////
-    std::string input_mode_;
+    Input_Mode input_mode_;
     bool verbose_;
 
     // constructor & destructor ///////////////////////////////////////////////
@@ -85,6 +95,7 @@ private:
     // port ===================================================================
     Setting::Ptr setting_ = nullptr;
     Dataset::Ptr dataset_ = nullptr;
+    Data_Stream::Ptr data_stream_ = nullptr;
 
     // camera -----------------------------------------------------------------
     std::string mono_camera_to_use_;
