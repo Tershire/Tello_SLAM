@@ -9,6 +9,7 @@ add_library(tello_slam SHARED
     imu/imu_reader.cpp
     marker/aruco_detector.cpp
     port/config.cpp
+    port/data_stream.cpp
     port/dataset.cpp
     port/setting.cpp
     tool/supervisor.cpp

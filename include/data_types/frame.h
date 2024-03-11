@@ -39,6 +39,7 @@ public:
     typedef std::shared_ptr<Frame> Ptr;
 
     // member data ////////////////////////////////////////////////////////////
+    // (TODO) maybe change them to private
     unsigned long id_ = 0; // frame ID
     unsigned long keyframe_id_ = 0; // keyframe ID
     bool is_keyframe_ = false; // is it a keyframe

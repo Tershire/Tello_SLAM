@@ -63,9 +63,9 @@ Frame::Ptr Dataset::load_next_frame()
 
         // CLAHE --------------------------------------------------------------
         // probably slower than reading as grayscale
-        // image_L = cv::imread(file_paths_L_[current_image_index_], cv::IMREAD_COLOR);
+        // image = cv::imread(file_paths_[current_image_index_], cv::IMREAD_COLOR);
 
-        // cv::cvtColor(image_L, image_L, cv::COLOR_BGR2Lab);
+        // cv::cvtColor(image, image, cv::COLOR_BGR2Lab);
         // --------------------------------------------------------------------
 
         //
@@ -80,16 +80,14 @@ Frame::Ptr Dataset::load_next_frame()
     }
 
     // pre-resizing -----------------------------------------------------------
-    cv::resize(image, image, cv::Size(), pre_resize_factor_, pre_resize_factor_,
-        cv::INTER_NEAREST);    
+    cv::resize(image, image, cv::Size(), pre_resize_factor_, pre_resize_factor_, cv::INTER_NEAREST);    
     // ------------------------------------------------------------------------
 
     // pre-processing: CLAHE ==================================================
     if (clahe_on_)
     {   
         // // Extract L channel from LAB
-        // cv::extractChannel(image_L, image_L, 0);
-        // cv::extractChannel(image_R, image_R, 0);
+        // cv::extractChannel(image, image, 0);
 
         // apply CLAHE
         clahe_->apply(image, image);
