@@ -302,15 +302,9 @@ int Frontend::detect_aruco_features()
     std::vector<std::vector<cv::Point2f>> corner_keypointss;
     aruco_detector_->detect(current_frame_->image_, aruco_ids, corner_keypointss);
 
-    //
-    std::cout << "{detect_aruco_features()} [1]" << std::endl;
-
     // estimate poses
     std::vector<SE3> Ts_cm;
     aruco_detector_->estimate_poses(aruco_ids, corner_keypointss, Ts_cm);
-
-    //
-    std::cout << "{detect_aruco_features()} [2]" << std::endl;
 
     // register features to current frame
     int num_aruco_features_detected = 0;
@@ -323,9 +317,6 @@ int Frontend::detect_aruco_features()
 
         num_aruco_features_detected += 1;
     }
-
-    //
-    std::cout << "{detect_aruco_features()} [3]" << std::endl;
 
     return num_aruco_features_detected;
 }
@@ -345,18 +336,10 @@ int Frontend::compute_aruco_poses()
 
         aruco_landmark->set_position(T_wc * p3D_camera);
         aruco_landmark->set_T_wm(T_wc * T_cm);
-        //
-        std::cout << "{compute_aruco_poses()} [1]-3" << std::endl;
-
         aruco_landmark->add_observation(current_frame_->aruco_features_[i]);
-        //
-        std::cout << "{compute_aruco_poses()} [1]-4" << std::endl;
 
         current_frame_->aruco_features_[i]->aruco_landmark_ = aruco_landmark;
 
-        //
-        std::cout << "{compute_aruco_poses()} [1]-5" << std::endl;
-        
         map_->insert_aruco_landmark(aruco_landmark);
 
         num_aruco_landmarks += 1;

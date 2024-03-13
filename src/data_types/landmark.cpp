@@ -26,18 +26,8 @@ Landmark::Landmark(long id, Vec3 position):
 // member methods /////////////////////////////////////////////////////////////
 void Landmark::add_observation(std::shared_ptr<Feature> feature)
 {
-    //
-    std::cout << "add_observation() [0]" << std::endl;
-
     std::unique_lock<std::mutex> lock(observations_mutex_);
-
-    //
-    std::cout << "add_observation() [1]" << std::endl;
-
     observations_.push_back(feature);
-
-    //
-    std::cout << "add_observation() [2]" << std::endl;
 
     num_observations_ += 1;
 }

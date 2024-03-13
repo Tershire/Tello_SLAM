@@ -32,6 +32,8 @@ Viewer::Viewer()
 
     trail_on_ = Config::read<int>("trail_on");
     motion_log_on_ = Config::read<int>("motion_log_on");
+    
+    resize_scale_factor_ = Config::read<float>("resize_scale_factor");
 }
 
 // getters & setters //////////////////////////////////////////////////////////
@@ -347,6 +349,10 @@ cv::Mat Viewer::draw_aruco_features_in_image() // (TO DO) fix segmentation fault
             }
         }
     }
+
+    // resize
+    cv::resize(image_out, image_out, cv::Size(), resize_scale_factor_, resize_scale_factor_, cv::INTER_LINEAR);
+
     return image_out;
 }
 

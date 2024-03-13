@@ -78,6 +78,8 @@ private:
 
     bool flag_request_update_map = false;
 
+    float resize_scale_factor_;
+
     // trail ==================================================================
     bool trail_on_;
     std::vector<Vec3> trail_points_;

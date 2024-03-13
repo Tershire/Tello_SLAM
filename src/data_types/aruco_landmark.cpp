@@ -26,18 +26,8 @@ ArUco_Landmark::ArUco_Landmark(long id, long aruco_id, SE3 T_wm):
 // member methods /////////////////////////////////////////////////////////////
 void ArUco_Landmark::add_observation(std::shared_ptr<ArUco_Feature> aruco_feature)
 {
-    //
-    std::cout << "add_observation() [0]" << std::endl;
-
     std::unique_lock<std::mutex> lock(observations_mutex_);
-
-    //
-    std::cout << "add_observation() [1]" << std::endl;
-
     observations_.push_back(aruco_feature);
-
-    //
-    std::cout << "add_observation() [2]" << std::endl;
 
     num_observations_ += 1;
 }

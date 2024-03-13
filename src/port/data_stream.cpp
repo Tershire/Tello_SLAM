@@ -97,6 +97,9 @@ Frame::Ptr Data_Stream::load_next_frame()
     auto t = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
     long timestamp = t.count();
 
+    // convert to grayscale image
+    cv::cvtColor(image, image, cv::COLOR_BGR2GRAY);
+
     // CLAHE --------------------------------------------------------------
     // probably slower than reading as grayscale
     // image = cv::imread(file_paths_[current_image_index_], cv::IMREAD_COLOR);
@@ -105,7 +108,7 @@ Frame::Ptr Data_Stream::load_next_frame()
     // --------------------------------------------------------------------
 
     // pre-resizing -----------------------------------------------------------
-    cv::resize(image, image, cv::Size(), pre_resize_factor_, pre_resize_factor_, cv::INTER_NEAREST);    
+    cv::resize(image, image, cv::Size(), pre_resize_factor_, pre_resize_factor_, cv::INTER_NEAREST);
     // ------------------------------------------------------------------------
 
     // pre-processing: CLAHE ==================================================
