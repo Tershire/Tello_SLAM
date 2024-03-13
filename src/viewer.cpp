@@ -336,11 +336,11 @@ cv::Mat Viewer::draw_aruco_features_in_image() // (TO DO) fix segmentation fault
                 if (aruco_feature->is_outlier_)
                 {
                     // std::cout << "[5]" << std::endl;
-                    cv::circle(image_out, aruco_feature->keypoint_.pt, 3, cv::Scalar(0, 0, 255), 2);
+                    // cv::circle(image_out, aruco_feature->keypoint_.pt, 3, cv::Scalar(0, 0, 255), 2);
                 }
                 else
                 {
-                    cv::circle(image_out, aruco_feature->keypoint_.pt, 3, cv::Scalar(0, 250, 0), 2);
+                    // cv::circle(image_out, aruco_feature->keypoint_.pt, 3, cv::Scalar(0, 250, 0), 2);
                 }
                 //
                 // std::cout << "[6]" << std::endl;

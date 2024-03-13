@@ -55,7 +55,7 @@ bool System::initialize()
 
     // port ===================================================================
     setting_ = std::make_shared<Setting>(Config::read<std::string>("setting_file_path"));
-    
+
     switch (input_mode_)
     {
         case TELLO:
@@ -87,13 +87,13 @@ bool System::initialize()
     mono_camera_->rescale(pre_resize_factor_);
 
     std::cout << "\t-set mono camera: " << mono_camera_to_use_ << std::endl;
-    
-    // create vision system components ========================================
+
+    // create utility components ==============================================
     // ArUco Detector ---------------------------------------------------------
     predifined_dictionary_name_ = Config::read<std::string>("predifined_dictionary_name");
     marker_length_ = Config::read<float>("marker_length");
-
     int target_id = Config::read<int>("target_ID");
+
     aruco_detector_ = std::make_shared<ArUco_Detector>(
         target_id, predifined_dictionary_name_, marker_length_, mono_camera_);
     aruco_detector_->set_verbose(verbose);
@@ -104,6 +104,28 @@ bool System::initialize()
     door_detector_->set_verbose(verbose);
     door_detector_->set_pre_resize_factor(pre_resize_factor_);
     
+    // create SLAM system components ==========================================
+    frontend_ = Frontend::Ptr(new Frontend);
+    backend_ = Backend::Ptr(new Backend);
+    map_ = Map::Ptr(new Map);
+
+    bool viewer_on = Config::read<int>("viewer_on");
+    if (viewer_on)
+    {
+        viewer_ = Viewer::Ptr(new Viewer);
+        viewer_->set_map(map_);
+        viewer_->set_frontend(frontend_);
+    }
+
+    frontend_->set_backend(backend_);
+    frontend_->set_map(map_);
+    frontend_->set_viewer(viewer_);
+    frontend_->set_camera(mono_camera_);
+    frontend_->set_aruco_detector(aruco_detector_);
+
+    // backend_->set_map(map_);
+    // backend_->set_camera(mono_camera_);
+
     return true;
 }
 
@@ -156,7 +178,7 @@ bool System::step()
     // ------------------------------------------------------------------------
 
     bool success = frontend_->step(frame);
-    
+
     // timer ------------------------------------------------------------------
     // auto t2 = std::chrono::steady_clock::now();
     // auto time_used =

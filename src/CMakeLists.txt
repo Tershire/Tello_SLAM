@@ -2,6 +2,8 @@ add_library(tello_slam SHARED
     camera/camera.cpp
     camera/brown_conrady.cpp
     camera/pinhole.cpp
+    data_types/aruco_feature.cpp
+    data_types/aruco_landmark.cpp
     data_types/feature.cpp
     data_types/frame.cpp
     data_types/landmark.cpp

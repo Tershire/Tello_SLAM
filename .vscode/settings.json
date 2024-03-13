@@ -92,6 +92,8 @@
         "__mutex_base": "cpp",
         "hash_map": "cpp",
         "hash_set": "cpp",
-        "__debug": "cpp"
+        "__debug": "cpp",
+        "__bit_reference": "cpp",
+        "filesystem": "cpp"
     }
 }

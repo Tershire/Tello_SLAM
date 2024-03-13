@@ -13,6 +13,7 @@
 
 #include "map.h"
 #include "feature.h"
+#include "aruco_feature.h"
 #include "config.h"
 
 

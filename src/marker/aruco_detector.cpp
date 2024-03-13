@@ -110,7 +110,13 @@ bool ArUco_Detector::estimate_poses(std::vector<int>& ids,
 
     for (size_t i = 0; i < ids.size(); ++i)
     {
-        p2Ds_pixel = p2Dss_pixel.at(ids.at(i));
+        //
+        std::cout << "{estimate_poses()} [1]-0" << std::endl;
+
+        p2Ds_pixel = p2Dss_pixel[i];
+
+        //
+        std::cout << "{estimate_poses()} [1]-1" << std::endl;
 
         // estimate pose with RANSAC
         cv::solvePnPRansac(p3Ds_marker_, p2Ds_pixel, 
@@ -133,6 +139,8 @@ bool ArUco_Detector::estimate_poses(std::vector<int>& ids,
 
         Ts_cm.push_back(T_cm);
     }
+
+    return true;
 }
 
 // ----------------------------------------------------------------------------

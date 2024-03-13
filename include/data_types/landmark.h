@@ -36,7 +36,9 @@ public:
 
     // member data ////////////////////////////////////////////////////////////
     unsigned long id_ = 0; // landmark ID
+
     Vec3 position_ = Vec3::Zero(); // 3D position in the world
+    
     std::list<std::weak_ptr<Feature>> observations_; // list of features corresponding to observations
     int num_observations_ = 0; // number of observations 
     

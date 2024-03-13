@@ -25,42 +25,38 @@
 namespace tello_slam
 {
 
+struct Frame;
 struct ArUco_Landmark;
 
 /**
  * keypoints and associated landmarks
  */
-struct ArUco_Feature: public Feature
+struct ArUco_Feature
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
     typedef std::shared_ptr<ArUco_Feature> Ptr;
 
     // member data ////////////////////////////////////////////////////////////
+    std::weak_ptr<Frame> frame_; // frame that holds the feature
+
     unsigned long aruco_id_; // ArUco marker ID
     std::vector<cv::Point2f> corner_keypoints_;
     SE3 T_cm_; // marker pose w.r.t camera
+    
     std::weak_ptr<ArUco_Landmark> aruco_landmark_; // associated landmark
+
+    bool is_outlier_ = false; // is it an outlier
 
 public:
     // constructor & destructor ///////////////////////////////////////////////
     ArUco_Feature() {}
 
-    ArUco_Feature(std::shared_ptr<Frame> frame, const cv::KeyPoint& center_keypoint, 
-        const long& aruco_id, const std::vector<cv::Point2f>& corner_keypoints, const SE3& T_cm)
-        : Feature(frame, center_keypoint)
-    {
-        aruco_id_ = aruco_id;
-        T_cm_ = T_cm;
-        corner_keypoints_ = corner_keypoints;
-    }
+    ArUco_Feature(std::shared_ptr<Frame> frame, const long& aruco_id, 
+        const std::vector<cv::Point2f>& corner_keypoints, const SE3& T_cm);
 
+    // getter & setter ////////////////////////////////////////////////////////
     // getter =================================================================
-    unsigned long get_aruco_id()
-    {
-        return aruco_id_;
-    }
-
     SE3 get_T_cm()
     {
         return T_cm_;

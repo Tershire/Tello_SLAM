@@ -39,12 +39,16 @@ Data_Stream::Data_Stream()
     switch (input_mode_)
     {
         case TELLO:
+        {
             cap_ = cv::VideoCapture(Config::read<std::string>("tello_video_stream"), cv::CAP_FFMPEG);
             break;
+        }
 
         case USB:
+        {
             cap_ = cv::VideoCapture(Config::read<int>("USB_camera_ID"));
             break;
+        }
 
         case VIDEO:
             cap_ = cv::VideoCapture(Config::read<std::string>("video_file_path"));

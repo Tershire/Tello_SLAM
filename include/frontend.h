@@ -61,6 +61,7 @@ public:
     void set_map(Map::Ptr map) {map_ = map;}
     void set_backend(std::shared_ptr<Backend> backend) {backend_ = backend;}
     void set_viewer(std::shared_ptr<Viewer> viewer) {viewer_ = viewer;}
+    void set_aruco_detector(std::shared_ptr<ArUco_Detector> aruco_detector) {aruco_detector_ = aruco_detector;}
     
     // member methods /////////////////////////////////////////////////////////
     /**

@@ -42,6 +42,7 @@ public:
     std::weak_ptr<Frame> frame_; // frame that holds the feature
     
     cv::KeyPoint keypoint_; // keypoint
+    
     std::weak_ptr<Landmark> landmark_; // associated landmark
 
     bool is_outlier_ = false; // is it an outlier
