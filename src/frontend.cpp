@@ -300,6 +300,9 @@ int Frontend::detect_aruco_features()
     std::vector<std::vector<cv::Point2f>> corner_keypointss;
     aruco_detector_->detect(current_frame_->image_, aruco_ids, corner_keypointss);
 
+    current_frame_->aruco_ids_ = aruco_ids;
+    current_frame_->corner_keypointss_ = corner_keypointss;
+
     // estimate poses
     std::vector<SE3> Ts_cm;
     aruco_detector_->estimate_poses(aruco_ids, corner_keypointss, Ts_cm);

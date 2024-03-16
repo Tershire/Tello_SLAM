@@ -45,10 +45,15 @@ public:
     bool is_keyframe_ = false; // is it a keyframe
 
     long timestamp_; // timestamp
-    SE3 T_cw_; // camera pose w.r.t the world
+    SE3 T_cw_ = SE3(); // camera pose w.r.t the world
     cv::Mat image_; // image
     std::vector<std::shared_ptr<Feature>> features_;
     std::vector<std::shared_ptr<ArUco_Feature>> aruco_features_;
+
+    // ArUco batch information ------------------------------------------------
+    std::vector<int> aruco_ids_;
+    std::vector<std::vector<cv::Point2f>> corner_keypointss_;
+    // ------------------------------------------------------------------------
 
     std::mutex T_cw_mutex_; // pose data mutex
 

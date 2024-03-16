@@ -19,6 +19,7 @@
 #include "feature.h"
 #include "aruco_feature.h"
 #include "config.h"
+#include "toolbox/conversion_toolbox.h"
 
 
 namespace tello_slam
@@ -315,45 +316,20 @@ void Viewer::follow_current_frame(pangolin::OpenGlRenderState& s_cam)
 // ----------------------------------------------------------------------------
 cv::Mat Viewer::draw_aruco_features_in_image() // (TO DO) fix segmentation fault
 {
-    //
-    // std::cout << "[0]" << std::endl;
-
     cv::Mat image_out;
     cv::cvtColor(current_frame_->image_, image_out, cv::COLOR_GRAY2BGR);
 
-    //
-    // std::cout << "[1]" << std::endl;
+    cv::aruco::drawDetectedMarkers(image_out, current_frame_->corner_keypointss_, current_frame_->aruco_ids_);
 
-    for (size_t i = 0; i < current_frame_->aruco_features_.size(); ++i)
+    for (auto& aruco_feature : current_frame_->aruco_features_)
     {
-        //
-        // std::cout << "[2]" << std::endl;
+        // convert
+        cv::Vec3d rvec;
+        cv::Vec3d tvec;
+        T_to_rvec_and_tvec(aruco_feature->T_cm_, rvec, tvec);
 
-        if (current_frame_->aruco_features_[i]) // -> segfault fix try #1
-        {
-            //
-            // std::cout << "[3]" << std::endl;
-
-            // (guess) [segfault] it seems like feature_L_[i] could be erased by the other thread
-            if (current_frame_->aruco_features_[i]->aruco_landmark_.lock())
-            {
-                //
-                // std::cout << "[4]" << std::endl;
-
-                auto aruco_feature = current_frame_->aruco_features_[i];
-                if (aruco_feature->is_outlier_)
-                {
-                    // std::cout << "[5]" << std::endl;
-                    // cv::circle(image_out, aruco_feature->keypoint_.pt, 3, cv::Scalar(0, 0, 255), 2);
-                }
-                else
-                {
-                    // cv::circle(image_out, aruco_feature->keypoint_.pt, 3, cv::Scalar(0, 250, 0), 2);
-                }
-                //
-                // std::cout << "[6]" << std::endl;
-            }
-        }
+        cv::drawFrameAxes(image_out, 
+            camera_->cameraMatrix_, camera_->distCoeffs_, rvec, tvec, 0.1, 2);
     }
 
     // resize

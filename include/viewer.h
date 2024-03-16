@@ -48,6 +48,8 @@ public:
     void set_frontend(Frontend::Ptr frontend) {frontend_ = frontend;}
 
     void set_current_frame(Frame::Ptr current_frame);
+    
+    void set_camera(Camera::Ptr camera) {camera_ = camera;}
 
     // member methods /////////////////////////////////////////////////////////
     /**
@@ -65,6 +67,8 @@ private:
     // member data ////////////////////////////////////////////////////////////
     Frame::Ptr current_frame_ = nullptr;
     Map::Ptr map_ = nullptr;
+    
+    Camera::Ptr camera_ = nullptr;
 
     std::thread thread_loop_;
     bool viewer_running_ = true;

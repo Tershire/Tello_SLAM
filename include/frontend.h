@@ -75,6 +75,7 @@ private:
 
     Frame::Ptr current_frame_ = nullptr;
     Frame::Ptr previous_frame_ = nullptr;
+    
     Camera::Ptr camera_ = nullptr;
 
     Map::Ptr map_ = nullptr;
