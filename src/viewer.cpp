@@ -211,13 +211,18 @@ void Viewer::draw_frame(Frame::Ptr frame, const float* COLOR)
 {
     Sophus::SE3d T_wc = frame->get_T_cw().inverse();
     
-    const float fx = 400; // should I change this (?)
-    const float fy = 400; // should I change this (?)
-    const float cx = 512; // should I change this (?)
-    const float cy = 384; // should I change this (?)
+    // const float fx = 400; // should I change this (?)
+    // const float fy = 400; // should I change this (?)
+    // const float cx = 512; // should I change this (?)
+    // const float cy = 384; // should I change this (?)
+
+    const float fx = camera_->fx_;
+    const float fy = camera_->fy_;
+    const float cx = camera_->cx_;
+    const float cy = camera_->cy_;
 
     const float SCALE = 0.25F; // scale frame size
-    const int   LINE_WIDTH = 2;
+    const int LINE_WIDTH = 2;
     const float WIDTH  = 1080;
     const float HEIGHT = 768;
 
