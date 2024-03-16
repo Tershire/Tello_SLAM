@@ -185,60 +185,16 @@ bool Frontend::track()
     }
 
     // estimate | compute current camera pose
-    Map::aruco_landmarks_type registered_aruco_landmarks = map_->get_all_aruco_landmarks();
-    SE3 T_wm, T_cm;
-    std::vector<SE3> Ts_wc;
-
-    for (auto& aruco_feature : current_frame_->aruco_features_)
+    int success = compute_camera_pose();
+    if (!success)
     {
-        for (auto& registered_aruco_landmark : registered_aruco_landmarks)
-        {
-            if (aruco_feature->aruco_id_ == registered_aruco_landmark.first)
-            {
-                T_wm = registered_aruco_landmark.second->T_wm_;
-                T_cm = aruco_feature->T_cm_;
-
-                //
-                // std::cout << "T_wm: " << T_wm.matrix() << ", T_cm: " << T_cm.matrix() << std::endl;
-                std::cout << "T_wc: " << (T_wm * T_cm.inverse()).matrix() << std::endl;
-
-                Ts_wc.push_back(T_wm * T_cm.inverse());
-            }
-        }
+        tracking_status_ = Tracking_Status::LOST;
     }
-
-    if (Ts_wc.size() > 1)
-    {
-        Sophus::enable_if_t<true, Sophus::optional<Sophus::SE3<double>>> mean_T_wc = Sophus::average(Ts_wc);
-        std::cout << "mean_T_wc: " << mean_T_wc->matrix() << std::endl;
-
-        current_frame_->set_T_cw(SE3(mean_T_wc->matrix()));
-    }
-
-    //
-    // 
 
     if (true) // (TODO) keyframe condition
     {
         insert_keyframe();
     }
-
-    // compute and update T_cw
-    // SE3 T_cm, T_wm;
-    // for (auto& aruco_feature : current_frame_->aruco_features_)
-    // {
-    //     auto aruco_landmark = aruco_feature->aruco_landmark_.lock();
-    //     if (aruco_landmark)
-    //     {
-    //         T_cm = aruco_feature->get_T_cm();
-    //         T_wm = aruco_landmark->get_T_wm();
-
-    //         //
-    //         std::cout << "T_cm * T_wm.inverse(): " << (T_cm * T_wm.inverse()).matrix() << std::endl;
-
-    //         current_frame_->set_T_cw(T_cm * T_wm.inverse());
-    //     }
-    // }
 
     // compute pose difference
     T_CurrPrev_ = current_frame_->get_T_cw() * previous_frame_->get_T_cw().inverse();
@@ -250,7 +206,7 @@ bool Frontend::track()
         SE3 T_PrevCurr = T_CurrPrev_.inverse();
 
         current_camera_translational_velocity_ = T_PrevCurr.translation() / delta_time;
-        std::cout << "current_camera_translational_velocity_: " << current_camera_translational_velocity_.transpose() << std::endl;
+        // std::cout << "current_camera_translational_velocity_: " << current_camera_translational_velocity_.transpose() << std::endl;
 
         // (TO DO) quaternion derivative
         // current_camera_angular_velocity_unit_quaternion_ = relative_pose_T_PrevCurr.unit_quaternion() / delta_time;
@@ -385,6 +341,51 @@ int Frontend::compute_aruco_poses()
     }
 
     return num_aruco_landmarks;
+}
+
+// ----------------------------------------------------------------------------
+int Frontend::compute_camera_pose()
+{
+    Map::aruco_landmarks_type registered_aruco_landmarks = map_->get_all_aruco_landmarks();
+
+    SE3 T_wm, T_cm;
+    std::vector<SE3> Ts_cw;
+    for (auto& aruco_feature : current_frame_->aruco_features_)
+    {
+        for (auto& registered_aruco_landmark : registered_aruco_landmarks)
+        {
+            if (aruco_feature->aruco_id_ == registered_aruco_landmark.first)
+            {
+                T_wm = registered_aruco_landmark.second->T_wm_;
+                T_cm = aruco_feature->T_cm_;
+
+                Ts_cw.push_back(T_cm * T_wm.inverse());
+            }
+        }
+    }
+
+    if (Ts_cw.size() > 0)
+    {
+        if (Ts_cw.size() > 1)
+        {
+            Sophus::enable_if_t<true, Sophus::optional<Sophus::SE3<double>>> mean_T_cw = Sophus::average(Ts_cw);
+            current_frame_->set_T_cw(SE3(mean_T_cw->matrix()));
+        }
+        else
+        {
+            current_frame_->set_T_cw(Ts_cw[0]);
+        }
+
+        //
+        SE3 T_cw = current_frame_->get_T_cw();
+        std::cout << "camera position: " << T_cw.translation().transpose() << std::endl;
+    }
+    else
+    {
+        return -1;
+    }
+
+    return 0;
 }
 
 } // namespace tello_slam

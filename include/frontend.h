@@ -143,6 +143,11 @@ private:
      * 
      */
     int compute_aruco_poses();
+
+    /**
+     * 
+     */
+    int compute_camera_pose();
 };
 
 } // namespace tello_slam
