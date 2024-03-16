@@ -93,13 +93,16 @@ void Viewer::thread_loop()
 
     // add named labels 
     std::vector<std::string> labels;
-    labels.push_back(std::string("v_x (ref.: left cam.)"));
-    labels.push_back(std::string("v_y (ref.: left cam.)"));
-    labels.push_back(std::string("v_z (ref.: left cam.)"));
+    labels.push_back(std::string("x [cm]"));
+    labels.push_back(std::string("y [cm]"));
+    labels.push_back(std::string("z [cm]"));
+    // labels.push_back(std::string("v_x"));
+    // labels.push_back(std::string("v_y"));
+    // labels.push_back(std::string("v_z"));
     log.SetLabels(labels);
 
     // create interactive view in window
-    pangolin::Plotter plotter(&log, 0.0, 300, -1, 1, 30, 0.5);
+    pangolin::Plotter plotter(&log, 0.0, 300, -50, 50, 30, 0.5);
     plotter.Track("$i"); // (TO DO) does it follow correctly in accordance with the timestamp (?)
 
     // Add some sample annotations to the plot
@@ -169,8 +172,11 @@ void Viewer::thread_loop()
         // log ================================================================
         if (motion_log_on_ && !do_pause_)
         {
-            Vec3 velocity = frontend_->get_current_camera_translational_velocity();
-            log.Log(velocity[0], velocity[1], velocity[2]);
+            Vec3 position = frontend_->get_current_camera_translational_velocity() * 1E2;
+            log.Log(position[0], position[1], position[2]);
+
+            // Vec3 velocity = frontend_->get_current_camera_translational_velocity();
+            // log.Log(velocity[0], velocity[1], velocity[2]);
         }
 
         // draw map ===========================================================

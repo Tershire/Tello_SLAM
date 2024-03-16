@@ -92,6 +92,7 @@ private:
     bool motion_log_on_;
     Quaternion current_camera_angular_velocity_unit_quaternion_;
     Vec3 current_camera_translational_velocity_;
+    Vec3 current_camera_position_;
 
     // member methods /////////////////////////////////////////////////////////
     /**

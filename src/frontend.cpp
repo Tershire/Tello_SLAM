@@ -202,6 +202,8 @@ bool Frontend::track()
     // deduce current instantaneous velocity
     if (motion_log_on_)
     {
+        current_camera_position_ = current_frame_->get_T_cw().translation();
+
         double delta_time = (current_frame_->timestamp_ - previous_frame_->timestamp_)*1E-3;
         SE3 T_PrevCurr = T_CurrPrev_.inverse();
 
