@@ -184,8 +184,9 @@ void Viewer::thread_loop()
         std::unique_lock<std::mutex> lock(data_mutex_);
         if (map_)
         {
-            draw_active_landmarks();
             draw_active_keyframes();
+            draw_active_landmarks();
+            draw_active_aruco_landmarks();
         }
 
         if (current_frame_)
@@ -286,6 +287,26 @@ void Viewer::draw_active_landmarks()
     for (auto& active_landmark : active_landmarks_)
     {
         auto position = active_landmark.second->get_position();
+        glColor3f(COLOR[0], COLOR[1], COLOR[2]);
+        glVertex3d(position[0], position[1], position[2]);
+    }
+    glEnd();
+}
+
+// ----------------------------------------------------------------------------
+void Viewer::draw_active_aruco_landmarks()
+{
+    const float COLOR[3] = {0.15F, 1.0F, 0.0F};
+
+    glPointSize(7);
+    glBegin(GL_POINTS);
+    for (auto& active_aruco_landmark : active_aruco_landmarks_)
+    {
+        auto position = active_aruco_landmark.second->get_position();
+
+        //
+        std::cout << "[*] ArUco ID: " << active_aruco_landmark.first << ", position [cm]: " << position.transpose()*1E2 << std::endl;
+
         glColor3f(COLOR[0], COLOR[1], COLOR[2]);
         glVertex3d(position[0], position[1], position[2]);
     }

@@ -99,9 +99,14 @@ private:
     void thread_loop();
 
     /**
-     * draw active map points and keyframes
+     * draw active landmarks
      */
     void draw_active_landmarks();
+
+    /**
+     * draw active ArUco landmarks
+     */
+    void draw_active_aruco_landmarks();
 
     /**
      * 

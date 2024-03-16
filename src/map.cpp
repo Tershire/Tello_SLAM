@@ -68,6 +68,8 @@ void Map::insert_landmark(Landmark::Ptr landmark)
 // ----------------------------------------------------------------------------
 void Map::insert_aruco_landmark(ArUco_Landmark::Ptr aruco_landmark)
 {
+    std::cout << "aruco_landmark->aruco_id_: " << aruco_landmark->aruco_id_ << std::endl;
+
     if (aruco_landmarks_.find(aruco_landmark->aruco_id_) == aruco_landmarks_.end())
     {
         aruco_landmarks_.insert(make_pair(aruco_landmark->aruco_id_, aruco_landmark));
@@ -75,8 +77,8 @@ void Map::insert_aruco_landmark(ArUco_Landmark::Ptr aruco_landmark)
     }
     else
     {
-        aruco_landmarks_[aruco_landmark->id_] = aruco_landmark;
-        active_aruco_landmarks_[aruco_landmark->id_] = aruco_landmark;
+        aruco_landmarks_[aruco_landmark->aruco_id_] = aruco_landmark;
+        active_aruco_landmarks_[aruco_landmark->aruco_id_] = aruco_landmark;
     }
 }
 

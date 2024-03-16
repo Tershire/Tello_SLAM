@@ -67,6 +67,12 @@ public:
         return T_wm_;
     }
 
+    Vec3 get_position()
+    {
+        std::unique_lock<std::mutex> lock(position_mutex_);
+        return position_;
+    }
+
     std::list<std::weak_ptr<ArUco_Feature>> get_observations()
     {
         std::unique_lock<std::mutex> lock(observations_mutex_);
@@ -74,6 +80,11 @@ public:
     }
 
     // setter =================================================================
+    void set_aruco_id(const unsigned long& aruco_id)
+    {
+        aruco_id_ = aruco_id;
+    }
+
     void set_T_wm(const SE3& T_wm)
     {
         std::unique_lock<std::mutex> lock(T_wm_mutex_);

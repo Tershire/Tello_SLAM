@@ -328,22 +328,29 @@ int Frontend::compute_aruco_poses()
     SE3 T_wc = current_frame_->get_T_cw().inverse();
            
     int num_aruco_landmarks = 0;
-    for (size_t i = 0; i < current_frame_->aruco_features_.size(); ++i)
+    for (auto& aruco_feature : current_frame_->aruco_features_)
     {
-        SE3 T_cm = current_frame_->aruco_features_[i]->T_cm_;
+        SE3 T_cm = aruco_feature->T_cm_;
         Vec3 p3D_camera = T_cm.translation();
 
         auto aruco_landmark = ArUco_Landmark::create_aruco_landmark();
+        aruco_landmark->set_aruco_id(aruco_feature->aruco_id_);
         aruco_landmark->set_position(T_wc * p3D_camera);
         aruco_landmark->set_T_wm(T_wc * T_cm);
-        aruco_landmark->add_observation(current_frame_->aruco_features_[i]);
+        aruco_landmark->add_observation(aruco_feature);
 
-        current_frame_->aruco_features_[i]->aruco_landmark_ = aruco_landmark;
+        aruco_feature->aruco_landmark_ = aruco_landmark;
 
         map_->insert_aruco_landmark(aruco_landmark);
 
+        //
+        // std::cout << "\t-inserted an aruco landmark to the map." << std::endl;
+        
         num_aruco_landmarks += 1;
     }
+
+    //
+    std::cout << "\t-number of active aruco landmarks: " << map_->get_active_aruco_landmarks().size() << std::endl;
 
     return num_aruco_landmarks;
 }
