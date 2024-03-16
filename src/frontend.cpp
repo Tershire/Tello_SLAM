@@ -380,7 +380,7 @@ int Frontend::compute_camera_pose()
 
         //
         SE3 T_cw = current_frame_->get_T_cw();
-        std::cout << "camera position: " << T_cw.translation().transpose() << std::endl;
+        std::cout << "-\tcamera position [cm]: " << T_cw.translation().transpose()*1E2 << std::endl;
     }
     else
     {
