@@ -31,6 +31,7 @@
 typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> MatXX;
 typedef Eigen::Matrix<double, 2, 2> Mat22;
 typedef Eigen::Matrix<double, 3, 3> Mat33;
+typedef Eigen::Matrix<double, 4, 4> Mat44;
 
 // double vectors
 typedef Eigen::Matrix<double, Eigen::Dynamic, 1> VecX;

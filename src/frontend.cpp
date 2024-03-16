@@ -14,6 +14,8 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/features2d.hpp>
 #include <unistd.h>
+#include <Sophus/sophus/common.hpp>
+#include <Sophus/sophus/average.hpp>
 
 #include "backend.h"
 #include "config.h"
@@ -49,7 +51,8 @@ bool Frontend::step(Frame::Ptr frame)
             track();
             break;
         case Tracking_Status::LOST:
-            reset();
+            track();
+            // reset();
             break;
     }
 
@@ -181,34 +184,71 @@ bool Frontend::track()
         return false;
     }
 
+    // estimate | compute current camera pose
+    Map::aruco_landmarks_type registered_aruco_landmarks = map_->get_all_aruco_landmarks();
+    SE3 T_wm, T_cm;
+    std::vector<SE3> Ts_wc;
+
+    for (auto& aruco_feature : current_frame_->aruco_features_)
+    {
+        for (auto& registered_aruco_landmark : registered_aruco_landmarks)
+        {
+            if (aruco_feature->aruco_id_ == registered_aruco_landmark.first)
+            {
+                T_wm = registered_aruco_landmark.second->T_wm_;
+                T_cm = aruco_feature->T_cm_;
+
+                //
+                // std::cout << "T_wm: " << T_wm.matrix() << ", T_cm: " << T_cm.matrix() << std::endl;
+                std::cout << "T_wc: " << (T_wm * T_cm.inverse()).matrix() << std::endl;
+
+                Ts_wc.push_back(T_wm * T_cm.inverse());
+            }
+        }
+    }
+
+    if (Ts_wc.size() > 1)
+    {
+        Sophus::enable_if_t<true, Sophus::optional<Sophus::SE3<double>>> mean_T_wc = Sophus::average(Ts_wc);
+        std::cout << "mean_T_wc: " << mean_T_wc->matrix() << std::endl;
+
+        current_frame_->set_T_cw(SE3(mean_T_wc->matrix()));
+    }
+
+    //
+    // 
+
     if (true) // (TODO) keyframe condition
     {
         insert_keyframe();
     }
 
     // compute and update T_cw
-    SE3 T_cm, T_wm;
-    for (auto& aruco_feature : current_frame_->aruco_features_)
-    {
-        auto aruco_landmark = aruco_feature->aruco_landmark_.lock();
-        if (aruco_landmark)
-        {
-            T_cm = aruco_feature->get_T_cm();
-            T_wm = aruco_landmark->get_T_wm();
+    // SE3 T_cm, T_wm;
+    // for (auto& aruco_feature : current_frame_->aruco_features_)
+    // {
+    //     auto aruco_landmark = aruco_feature->aruco_landmark_.lock();
+    //     if (aruco_landmark)
+    //     {
+    //         T_cm = aruco_feature->get_T_cm();
+    //         T_wm = aruco_landmark->get_T_wm();
 
-            current_frame_->set_T_cw(T_cm * T_wm.inverse());
-        }
-    }
+    //         //
+    //         std::cout << "T_cm * T_wm.inverse(): " << (T_cm * T_wm.inverse()).matrix() << std::endl;
+
+    //         current_frame_->set_T_cw(T_cm * T_wm.inverse());
+    //     }
+    // }
 
     // compute pose difference
-    // T_CurrPrev_ = current_frame_->get_T_cw() * previous_frame_->get_T_cw().inverse();
+    T_CurrPrev_ = current_frame_->get_T_cw() * previous_frame_->get_T_cw().inverse();
 
     // deduce current instantaneous velocity
     if (motion_log_on_)
     {
-        double delta_time = current_frame_->timestamp_ - previous_frame_->timestamp_;
+        double delta_time = (current_frame_->timestamp_ - previous_frame_->timestamp_)*1E-3;
         SE3 T_PrevCurr = T_CurrPrev_.inverse();
-        
+
         current_camera_translational_velocity_ = T_PrevCurr.translation() / delta_time;
         std::cout << "current_camera_translational_velocity_: " << current_camera_translational_velocity_.transpose() << std::endl;
 
@@ -253,7 +293,7 @@ bool Frontend::insert_keyframe()
     map_->insert_keyframe(current_frame_);
 
     std::cout << "set frame " << current_frame_->id_ << " as keyframe "
-              << current_frame_->keyframe_id_ << std::endl;
+        << current_frame_->keyframe_id_ << std::endl;
 
     add_observation();
 
@@ -333,7 +373,6 @@ int Frontend::compute_aruco_poses()
         Vec3 p3D_camera = T_cm.translation();
 
         auto aruco_landmark = ArUco_Landmark::create_aruco_landmark();
-
         aruco_landmark->set_position(T_wc * p3D_camera);
         aruco_landmark->set_T_wm(T_wc * T_cm);
         aruco_landmark->add_observation(current_frame_->aruco_features_[i]);

@@ -164,6 +164,11 @@ bool System::step()
         case VIDEO:
         {
             frame = data_stream_->load_next_frame();
+
+            //
+            // std::time_t t = std::chrono::system_clock::to_time_t();
+            std::cout << std::fixed << ">>> frame loaded with timestamp: " << frame->timestamp_ << std::endl;
+
             break;
         }
 

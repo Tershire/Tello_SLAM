@@ -44,7 +44,7 @@ public:
     unsigned long keyframe_id_ = 0; // keyframe ID
     bool is_keyframe_ = false; // is it a keyframe
 
-    double timestamp_; // timestamp
+    long timestamp_; // timestamp
     SE3 T_cw_; // camera pose w.r.t the world
     cv::Mat image_; // image
     std::vector<std::shared_ptr<Feature>> features_;
