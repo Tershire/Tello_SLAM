@@ -200,10 +200,10 @@ bool Frontend::track()
     T_CurrPrev_ = current_frame_->get_T_cw() * previous_frame_->get_T_cw().inverse();
 
     //
-    for (auto& active_aruco_landmark : map_->get_active_aruco_landmarks())
-    {
-        std::cout << "#obsv.s [ID " << active_aruco_landmark.first << "]: " << active_aruco_landmark.second->num_observations_ << std::endl;
-    }
+    // for (auto& active_aruco_landmark : map_->get_active_aruco_landmarks())
+    // {
+    //     std::cout << "#obsv.s [ID " << active_aruco_landmark.first << "]: " << active_aruco_landmark.second->num_observations_ << std::endl;
+    // }
 
     // deduce current instantaneous velocity
     if (motion_log_on_)
@@ -395,7 +395,7 @@ int Frontend::compute_aruco_poses()
     }
 
     //
-    std::cout << "\t-number of active aruco landmarks: " << map_->get_active_aruco_landmarks().size() << std::endl;
+    std::cout << "\tnumber of active aruco landmarks: " << map_->get_active_aruco_landmarks().size() << std::endl;
 
     return num_aruco_landmarks;
 }
@@ -432,7 +432,9 @@ int Frontend::compute_camera_pose()
 
         //
         SE3 T_cw = current_frame_->get_T_cw();
-        std::cout << "-\tcamera position [cm]: " << T_cw.translation().transpose()*1E2 << std::endl;
+        Vec3 p3D_world = T_cw.translation().transpose()*1E2;
+        std::printf("\tcamera position [cm]: (%7.1f, %7.1f, %7.1f)", p3D_world[0], p3D_world[1], p3D_world[2]);
+        std::cout << std::endl;
     }
     else
     {

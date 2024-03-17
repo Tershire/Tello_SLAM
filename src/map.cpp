@@ -157,7 +157,7 @@ void Map::clear()
         }
     }
 
-    std::cout << "removed " << num_landmarks_removed << " active landmarks" << std::endl;
+    // std::cout << "removed " << num_landmarks_removed << " active landmarks" << std::endl;
 }
 
 } // namespace tello_slam
