@@ -223,7 +223,7 @@ void Viewer::draw_frame(Frame::Ptr frame, const float* COLOR)
     // const float cx = camera_->cx_;
     // const float cy = camera_->cy_;
 
-    const float SCALE = aruco_detector_->get_marker_length(); // scale frame size
+    const float SCALE = 0.25*aruco_detector_->get_marker_length(); // scale frame size
     const int LINE_WIDTH = 2;
     const float WIDTH  = 1080;
     const float HEIGHT = 768;
