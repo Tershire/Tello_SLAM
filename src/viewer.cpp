@@ -298,19 +298,35 @@ void Viewer::draw_active_aruco_landmarks()
 {
     const float COLOR[3] = {0.15F, 1.0F, 0.0F};
 
+    glColor3f(COLOR[0], COLOR[1], COLOR[2]);
     glPointSize(7);
-    glBegin(GL_POINTS);
+    glLineWidth(2);
     for (auto& active_aruco_landmark : active_aruco_landmarks_)
     {
+        // compute marker corner positions in the world
+        std::vector<Vec3> p3Ds_world;
+        for (auto& p3D : aruco_detector_->get_p3Ds_marker())
+        {
+            Vec3 p3D_marker(p3D.x, p3D.y, p3D.z);
+            Vec3 p3D_world = active_aruco_landmark.second->get_T_wm() * p3D_marker;
+
+            p3Ds_world.push_back(p3D_world);
+        }
+
+        // center point
+        glBegin(GL_POINTS);
         auto position = active_aruco_landmark.second->get_position();
-
-        //
-        std::cout << "[*] ArUco ID: " << active_aruco_landmark.first << ", position [cm]: " << position.transpose()*1E2 << std::endl;
-
-        glColor3f(COLOR[0], COLOR[1], COLOR[2]);
         glVertex3d(position[0], position[1], position[2]);
+        glEnd();
+
+        // contour
+        glBegin(GL_LINES);
+        for (auto& i : std::vector{0, 1, 1, 2, 2, 3, 3, 0})
+        {
+            glVertex3d(p3Ds_world[i][0], p3Ds_world[i][1], p3Ds_world[i][2]);
+        }
+        glEnd();
     }
-    glEnd();
 }
 
 // ----------------------------------------------------------------------------

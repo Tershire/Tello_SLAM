@@ -50,6 +50,7 @@ public:
     void set_current_frame(Frame::Ptr current_frame);
     
     void set_camera(Camera::Ptr camera) {camera_ = camera;}
+    void set_aruco_detector(std::shared_ptr<ArUco_Detector> aruco_detector) {aruco_detector_ = aruco_detector;}
 
     // member methods /////////////////////////////////////////////////////////
     /**
@@ -83,6 +84,9 @@ private:
     bool flag_request_update_map = false;
 
     float resize_scale_factor_;
+
+    // utilities ==============================================================
+    ArUco_Detector::Ptr aruco_detector_ = nullptr;
 
     // trail ==================================================================
     bool trail_on_;

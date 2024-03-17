@@ -87,7 +87,7 @@ private:
     // system configuration parameters ========================================
 
     // utilities ==============================================================
-    ArUco_Detector::Ptr aruco_detector_;
+    ArUco_Detector::Ptr aruco_detector_ = nullptr;
 
     // motion log =============================================================
     bool motion_log_on_;

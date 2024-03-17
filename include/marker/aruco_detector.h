@@ -64,6 +64,8 @@ public:
     Vec3 get_euler_angles_cm() const {return euler_angles_cm_;}
     bool get_target_found() const {return target_found_;}
 
+    std::vector<cv::Point3d> get_p3Ds_marker() const {return p3Ds_marker_;}
+
     // setter =================================================================
     void set_target_id(const int& target_id) {target_id_ = target_id;}
     void set_verbose(const bool& verbose) {verbose_ = verbose;}

@@ -116,6 +116,7 @@ bool System::initialize()
         viewer_->set_map(map_);
         viewer_->set_frontend(frontend_);
         viewer_->set_camera(mono_camera_);
+        viewer_->set_aruco_detector(aruco_detector_);
     }
 
     frontend_->set_backend(backend_);
