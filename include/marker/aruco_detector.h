@@ -65,6 +65,7 @@ public:
     bool get_target_found() const {return target_found_;}
 
     std::vector<cv::Point3d> get_p3Ds_marker() const {return p3Ds_marker_;}
+    double get_marker_length() const {return marker_length_;}
 
     // setter =================================================================
     void set_target_id(const int& target_id) {target_id_ = target_id;}
