@@ -55,8 +55,9 @@ void Viewer::update_map()
 {
     //std::unique_lock<std::mutex> lock(data_mutex_);
     assert(map_ != nullptr);
+    active_keyframes_ = map_->get_active_keyframes();
     active_landmarks_ = map_->get_active_landmarks();
-    active_keyframes_  = map_->get_active_keyframes();
+    active_aruco_landmarks_ = map_->get_active_aruco_landmarks();
     map_updated_ = true;
 }
 
@@ -212,15 +213,14 @@ void Viewer::draw_frame(Frame::Ptr frame, const float* COLOR)
 {
     Sophus::SE3d T_wc = frame->get_T_cw().inverse();
     
-    // const float fx = 400; // should I change this (?)
-    // const float fy = 400; // should I change this (?)
-    // const float cx = 512; // should I change this (?)
-    // const float cy = 384; // should I change this (?)
-
-    const float fx = camera_->fx_;
-    const float fy = camera_->fy_;
-    const float cx = camera_->cx_;
-    const float cy = camera_->cy_;
+    const float fx = 400; // should I change this (?)
+    const float fy = 400; // should I change this (?)
+    const float cx = 512; // should I change this (?)
+    const float cy = 384; // should I change this (?)
+    // const float fx = camera_->fx_;
+    // const float fy = camera_->fy_;
+    // const float cx = camera_->cx_;
+    // const float cy = camera_->cy_;
 
     const float SCALE = 0.25F; // scale frame size
     const int LINE_WIDTH = 2;
