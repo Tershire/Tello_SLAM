@@ -174,9 +174,9 @@ bool Frontend::track()
     //     current_frame_->set_T_cw(T_CurrPrev_ * previous_frame_->get_T_cw());
     // }
 
-    // detect ArUco
-    int num_detected_aruco_features = detect_aruco_features();
-    if (num_detected_aruco_features < 1)
+    // track ArUco
+    std::vector<unsigned int> tracked_aruco_ids = track_aruco_features();
+    if (tracked_aruco_ids.size() < 1)
     {
         tracking_status_ = Tracking_Status::LOST;
 
@@ -198,6 +198,12 @@ bool Frontend::track()
 
     // compute pose difference
     T_CurrPrev_ = current_frame_->get_T_cw() * previous_frame_->get_T_cw().inverse();
+
+    //
+    for (auto& active_aruco_landmark : map_->get_active_aruco_landmarks())
+    {
+        std::cout << "#obsv.s [ID " << active_aruco_landmark.first << "]: " << active_aruco_landmark.second->num_observations_ << std::endl;
+    }
 
     // deduce current instantaneous velocity
     if (motion_log_on_)
@@ -308,7 +314,7 @@ int Frontend::detect_aruco_features()
     aruco_detector_->estimate_poses(aruco_ids, corner_keypointss, Ts_cm);
 
     // register features to current frame
-    int num_aruco_features_detected = 0;
+    int num_detected_aruco_features = 0;
     for (size_t i = 0; i < aruco_ids.size(); ++i)
     {
         ArUco_Feature::Ptr aruco_feature(new ArUco_Feature(current_frame_, 
@@ -316,10 +322,34 @@ int Frontend::detect_aruco_features()
         
         current_frame_->aruco_features_.push_back(aruco_feature);
 
-        num_aruco_features_detected += 1;
+        num_detected_aruco_features += 1;
     }
 
-    return num_aruco_features_detected;
+    return num_detected_aruco_features;
+}
+
+// ----------------------------------------------------------------------------
+std::vector<unsigned int> Frontend::track_aruco_features()
+{
+    detect_aruco_features();
+
+    std::vector<unsigned int> tracked_aruco_ids;
+    Map::aruco_landmarks_type registered_aruco_landmarks = map_->get_all_aruco_landmarks();
+    SE3 T_wm, T_cm;
+    for (auto& aruco_feature : current_frame_->aruco_features_)
+    {
+        for (auto& registered_aruco_landmark : registered_aruco_landmarks)
+        {
+            if (aruco_feature->aruco_id_ == registered_aruco_landmark.first)
+            {
+                aruco_feature->aruco_landmark_ = registered_aruco_landmark.second;
+
+                tracked_aruco_ids.push_back(aruco_feature->aruco_id_);
+            }
+        }
+    }
+
+    return tracked_aruco_ids;
 }
 
 // ----------------------------------------------------------------------------
@@ -330,13 +360,23 @@ int Frontend::compute_aruco_poses()
     int num_aruco_landmarks = 0;
     for (auto& aruco_feature : current_frame_->aruco_features_)
     {
+        ArUco_Landmark::Ptr aruco_landmark;
+        if (aruco_feature->aruco_landmark_.lock())
+        {
+            aruco_landmark = aruco_feature->aruco_landmark_.lock();
+        }
+        else
+        {
+            aruco_landmark = ArUco_Landmark::create_aruco_landmark();
+        }
+
         SE3 T_cm = aruco_feature->T_cm_;
         Vec3 p3D_camera = T_cm.translation();
 
-        auto aruco_landmark = ArUco_Landmark::create_aruco_landmark();
         aruco_landmark->set_aruco_id(aruco_feature->aruco_id_);
         aruco_landmark->set_position(T_wc * p3D_camera);
         aruco_landmark->set_T_wm(T_wc * T_cm);
+
         aruco_landmark->add_observation(aruco_feature);
 
         aruco_feature->aruco_landmark_ = aruco_landmark;
