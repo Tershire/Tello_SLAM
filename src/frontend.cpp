@@ -341,9 +341,10 @@ std::vector<unsigned int> Frontend::track_aruco_features()
         if (registered_aruco_landmarks.find(aruco_feature->aruco_id_) != registered_aruco_landmarks.end())
         {
             // check pose stability
-            // bool is_pose_stable = determine_pose_stability(aruco_feature->T_cm_, registered_aruco_landmark.second->aruco);
+            bool is_pose_stable = determine_pose_stability(aruco_feature->T_cm_, 
+                registered_aruco_landmarks[aruco_feature->aruco_id_]->observations_.back().lock()->T_cm_);
 
-            if (true)
+            if (is_pose_stable)
             {
                 // set the landmark of the detected feature as the corresponding registered aruco landmark 
                 aruco_feature->aruco_landmark_ = registered_aruco_landmarks[aruco_feature->aruco_id_];

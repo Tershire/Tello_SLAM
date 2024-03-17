@@ -167,7 +167,10 @@ private:
         // translation error
         double translation_error = (T2.translation() - T1.translation()).norm() / aruco_detector_->get_marker_length();
 
-        return (rotation_error < 0.5) & (translation_error < 0.1);
+        //
+        // std::cout << "rotation_error: " << rotation_error << ", " << "translation_error: " << translation_error << std::endl;
+
+        return (rotation_error < 0.3) & (translation_error < 10);
     }
 };
 
