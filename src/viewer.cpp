@@ -13,6 +13,7 @@
 
 #include <pangolin/pangolin.h>
 #include <opencv2/opencv.hpp>
+#include <pangolin/display/default_font.h>
 
 #include "viewer.h"
 #include "frame.h"
@@ -79,7 +80,7 @@ void Viewer::thread_loop()
     // define projection and initial ModelView matrix
     pangolin::OpenGlRenderState s_cam(
         pangolin::ProjectionMatrix(1024, 768, 400, 400, 512, 384, 0.1, 1000),
-        pangolin::ModelViewLookAt(0, -5, -10, 0, 0, 0, 0.0, -1.0, 0.0));
+        pangolin::ModelViewLookAt(0, -0.7, -0.5, 0, 0, 0, 0.0, -1.0, 0.0));
 
     // create interactive view in window
     pangolin::Handler3D handler(s_cam);
@@ -296,13 +297,15 @@ void Viewer::draw_active_landmarks()
 // ----------------------------------------------------------------------------
 void Viewer::draw_active_aruco_landmarks()
 {
-    const float COLOR[3] = {0.15F, 1.0F, 0.0F};
+    const float GREEN[3] = {0.15F, 1.0F, 0.0F};
+    const float PURPLE[3] = {1.0F, 0.15F, 1.0F};
 
-    glColor3f(COLOR[0], COLOR[1], COLOR[2]);
     glPointSize(7);
     glLineWidth(2);
     for (auto& active_aruco_landmark : active_aruco_landmarks_)
     {
+        glColor3f(GREEN[0], GREEN[1], GREEN[2]);
+
         // compute marker corner positions in the world
         std::vector<Vec3> p3Ds_world;
         for (auto& p3D : aruco_detector_->get_p3Ds_marker())
@@ -326,6 +329,12 @@ void Viewer::draw_active_aruco_landmarks()
             glVertex3d(p3Ds_world[i][0], p3Ds_world[i][1], p3Ds_world[i][2]);
         }
         glEnd();
+
+        glColor3f(PURPLE[0], PURPLE[1], PURPLE[2]);
+
+        // ID
+        pangolin::GlText text = pangolin::default_font().Text(std::to_string(active_aruco_landmark.first));
+        text.Draw(position[0], position[1], position[2]);
     }
 }
 
