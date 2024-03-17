@@ -94,6 +94,7 @@
         "hash_set": "cpp",
         "__debug": "cpp",
         "__bit_reference": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "__string": "cpp"
     }
 }

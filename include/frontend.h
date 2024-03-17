@@ -155,6 +155,20 @@ private:
      * 
      */
     int compute_camera_pose();
+
+    /**
+     * 
+     */
+    inline bool determine_pose_stability(const SE3& T1, const SE3& T2)
+    {
+        // rotation error 
+        double rotation_error = (T2.so3().unit_quaternion().vec() - T1.so3().unit_quaternion().vec()).norm();
+
+        // translation error
+        double translation_error = (T2.translation() - T1.translation()).norm() / aruco_detector_->get_marker_length();
+
+        return (rotation_error < 0.5) & (translation_error < 0.1);
+    }
 };
 
 } // namespace tello_slam

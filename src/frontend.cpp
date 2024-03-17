@@ -335,14 +335,18 @@ std::vector<unsigned int> Frontend::track_aruco_features()
 
     std::vector<unsigned int> tracked_aruco_ids;
     Map::aruco_landmarks_type registered_aruco_landmarks = map_->get_all_aruco_landmarks();
-    SE3 T_wm, T_cm;
+    SE3 T_cm;
     for (auto& aruco_feature : current_frame_->aruco_features_)
     {
-        for (auto& registered_aruco_landmark : registered_aruco_landmarks)
+        if (registered_aruco_landmarks.find(aruco_feature->aruco_id_) != registered_aruco_landmarks.end())
         {
-            if (aruco_feature->aruco_id_ == registered_aruco_landmark.first)
+            // check pose stability
+            // bool is_pose_stable = determine_pose_stability(aruco_feature->T_cm_, registered_aruco_landmark.second->aruco);
+
+            if (true)
             {
-                aruco_feature->aruco_landmark_ = registered_aruco_landmark.second;
+                // set the landmark of the detected feature as the corresponding registered aruco landmark 
+                aruco_feature->aruco_landmark_ = registered_aruco_landmarks[aruco_feature->aruco_id_];
 
                 tracked_aruco_ids.push_back(aruco_feature->aruco_id_);
             }
@@ -404,15 +408,12 @@ int Frontend::compute_camera_pose()
     std::vector<SE3> Ts_cw;
     for (auto& aruco_feature : current_frame_->aruco_features_)
     {
-        for (auto& registered_aruco_landmark : registered_aruco_landmarks)
+        if (registered_aruco_landmarks.find(aruco_feature->aruco_id_) != registered_aruco_landmarks.end())
         {
-            if (aruco_feature->aruco_id_ == registered_aruco_landmark.first)
-            {
-                T_wm = registered_aruco_landmark.second->T_wm_;
-                T_cm = aruco_feature->T_cm_;
+            T_wm = registered_aruco_landmarks[aruco_feature->aruco_id_]->T_wm_;
+            T_cm = aruco_feature->T_cm_;
 
-                Ts_cw.push_back(T_cm * T_wm.inverse());
-            }
+            Ts_cw.push_back(T_cm * T_wm.inverse());
         }
     }
 
