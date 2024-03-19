@@ -12,8 +12,8 @@
 
 
 #include <pangolin/pangolin.h>
+#include <pangolin/display/default_font.h> // to display text
 #include <opencv2/opencv.hpp>
-#include <pangolin/display/default_font.h>
 
 #include "viewer.h"
 #include "frame.h"
@@ -365,7 +365,7 @@ void Viewer::follow_current_frame(pangolin::OpenGlRenderState& s_cam)
 }
 
 // ----------------------------------------------------------------------------
-cv::Mat Viewer::draw_aruco_features_in_image() // (TO DO) fix segmentation fault
+cv::Mat Viewer::draw_aruco_features_in_image()
 {
     cv::Mat image_out;
     cv::cvtColor(current_frame_->image_, image_out, cv::COLOR_GRAY2BGR);
@@ -375,12 +375,10 @@ cv::Mat Viewer::draw_aruco_features_in_image() // (TO DO) fix segmentation fault
     for (auto& aruco_feature : current_frame_->aruco_features_)
     {
         // convert
-        cv::Vec3d rvec;
-        cv::Vec3d tvec;
+        cv::Vec3d rvec, tvec;
         T_to_rvec_and_tvec(aruco_feature->T_cm_, rvec, tvec);
 
-        cv::drawFrameAxes(image_out, 
-            camera_->cameraMatrix_, camera_->distCoeffs_, rvec, tvec, 0.1, 2);
+        cv::drawFrameAxes(image_out, camera_->cameraMatrix_, camera_->distCoeffs_, rvec, tvec, 0.1, 2);
     }
 
     // resize

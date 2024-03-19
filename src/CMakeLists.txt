@@ -8,6 +8,7 @@ add_library(tello_slam SHARED
     data_types/frame.cpp
     data_types/landmark.cpp
     door/door_detector.cpp
+    estimator/filter/extended_kalman_filter.cpp
     imu/imu_reader.cpp
     marker/aruco_detector.cpp
     port/config.cpp

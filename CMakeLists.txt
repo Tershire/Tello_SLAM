@@ -42,16 +42,20 @@ set(THIRD_PARTY_LIBS
     ${Pangolin_LIBRARIES})
 
 # #############################################################################
-include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/include/camera)
-include_directories(${PROJECT_SOURCE_DIR}/include/data_types)
-include_directories(${PROJECT_SOURCE_DIR}/include/door)
-include_directories(${PROJECT_SOURCE_DIR}/include/imu)
-include_directories(${PROJECT_SOURCE_DIR}/include/marker)
-include_directories(${PROJECT_SOURCE_DIR}/include/port)
-include_directories(${PROJECT_SOURCE_DIR}/include/tool)
-include_directories(${PROJECT_SOURCE_DIR}/include/toolbox)
-include_directories(${PROJECT_SOURCE_DIR}/third-party)
+include_directories(${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/include/camera
+    ${PROJECT_SOURCE_DIR}/include/data_types
+    ${PROJECT_SOURCE_DIR}/include/door
+    ${PROJECT_SOURCE_DIR}/include/estimator
+    ${PROJECT_SOURCE_DIR}/include/estimator/filter
+    ${PROJECT_SOURCE_DIR}/include/estimator/optimizer
+    ${PROJECT_SOURCE_DIR}/include/imu
+    ${PROJECT_SOURCE_DIR}/include/marker
+    ${PROJECT_SOURCE_DIR}/include/port
+    ${PROJECT_SOURCE_DIR}/include/tool
+    ${PROJECT_SOURCE_DIR}/include/toolbox
+    ${PROJECT_SOURCE_DIR}/third-party)
+
 add_subdirectory(app)
 add_subdirectory(src)
 add_subdirectory(test)

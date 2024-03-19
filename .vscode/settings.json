@@ -95,6 +95,7 @@
         "__debug": "cpp",
         "__bit_reference": "cpp",
         "filesystem": "cpp",
-        "__string": "cpp"
+        "__string": "cpp",
+        "numericaldiff": "cpp"
     }
 }
