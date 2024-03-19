@@ -19,24 +19,31 @@ namespace tello_slam
 
 // public XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 // constructor & destructor ///////////////////////////////////////////////////
-EKF_Camera_Pose::EKF_Camera_Pose()
+EKF_Camera_Pose::EKF_Camera_Pose(Camera::Ptr camera)
+    : camera_(camera)
 {
+    // motion
+    F_ = Mat66::Identity();
 
-}
+    // observation
+    H_;
+};
 
 // member methods /////////////////////////////////////////////////////////////
 EKF_Camera_Pose::state_distribution EKF_Camera_Pose::estimate(
-    const EKF_Camera_Pose::state_distribution& state_distribution_post_prev, const Vec6& z_meas)
+    const EKF_Camera_Pose::state_distribution& state_distribution_post_prev, 
+    const Vec6& u, const Mat66& Q,
+    const Vec6& z_meas, const Mat66& R)
 {
     Vec6 x_post_prev = std::get<0>(state_distribution_post_prev);
     Mat66 P_post_prev = std::get<1>(state_distribution_post_prev);
 
     // prediction
-    Vec6 x_prio = F_*x_post_prev + u_;
-    Mat66 P_prio = F_*P_post_prev*F_.transpose() + Q_;
+    Vec6 x_prio = F_*x_post_prev + u;
+    Mat66 P_prio = F_*P_post_prev*F_.transpose() + Q;
 
     // Kalman gain
-    Mat66 S = H_*P_prio*H_.transpose() + R_;
+    Mat66 S = H_*P_prio*H_.transpose() + R;
     Mat66 K = P_prio*H_.transpose()*S.inverse();
 
     // update
@@ -48,6 +55,15 @@ EKF_Camera_Pose::state_distribution EKF_Camera_Pose::estimate(
 
 // private XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 // member methods /////////////////////////////////////////////////////////////
+void EKF_Camera_Pose::compute_and_set_Q()
+{
 
+};
+
+// ----------------------------------------------------------------------------
+void EKF_Camera_Pose::compute_and_set_R()
+{
+
+};
 
 } // namespace tello_slam

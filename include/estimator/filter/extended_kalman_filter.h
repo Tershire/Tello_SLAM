@@ -35,7 +35,9 @@ public:
     typedef std::pair<Vec6, Mat66> state_distribution;
 
     // constructor & destructor ///////////////////////////////////////////////
-    EKF_Camera_Pose();
+    EKF_Camera_Pose() {};
+
+    EKF_Camera_Pose(Camera::Ptr camera);
 
     // getter & setter ////////////////////////////////////////////////////////
     // setter =================================================================
@@ -51,24 +53,30 @@ public:
     /**
      * estimate
      */
-    state_distribution estimate(const state_distribution& state_distribution, const Vec6& z_meas);
+    state_distribution estimate(const state_distribution& state_distribution_post_prev, 
+        const Vec6& u, const Mat66& Q,
+        const Vec6& z_meas, const Mat66& R);
 
 private:
     // member data ////////////////////////////////////////////////////////////
-    // state
-    Vec6 x_; // camera pose T_cw as so3
-    Vec6 u_; // input
-    Mat66 P_; // covariance
-
     // motion
     Mat66 F_; // Jacobian (state)
-    Mat66 Q_; // covariance
 
     // observation
     Mat66 H_; // Jacobian
-    Mat66 R_; // covariance
     
     Camera::Ptr camera_ = nullptr;
+
+    // member methods /////////////////////////////////////////////////////////
+    /**
+     *
+     */
+    void compute_and_set_Q();
+
+    /**
+     *
+     */
+    void compute_and_set_R();
 };
 
 } // namespace tello_slam
