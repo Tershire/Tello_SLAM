@@ -26,7 +26,7 @@ namespace tello_slam
  * x <- F*x + u + w
  * y <- H*x + v
  * 
- * state: x is se3 <--- SE3: T_wc
+ * state: x is se3 <--- SE3: T_cm
  * observation: z is projected pixel point in image of the upper left marker corner point.
 */
 class EKF_Camera_Pose
@@ -57,8 +57,7 @@ public:
      * estimate
      */
     state_distribution estimate(const state_distribution& state_distribution_post_prev, 
-        const Vec6& u, const Mat66& Q,
-        const Vec2& z_meas, const Mat22& R);
+        const Vec6& u, const Vec2& z_meas);
 
 private:
     // member data ////////////////////////////////////////////////////////////
@@ -79,12 +78,12 @@ private:
     /**
      *
      */
-    void compute_and_set_Q();
+    Mat66 compute_Q();
 
     /**
      *
      */
-    void compute_and_set_R();
+    Mat22 compute_R();
 };
 
 } // namespace tello_slam

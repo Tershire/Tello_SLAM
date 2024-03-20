@@ -32,14 +32,16 @@ EKF_Camera_Pose::EKF_Camera_Pose(Camera::Ptr camera)
 // member methods /////////////////////////////////////////////////////////////
 EKF_Camera_Pose::state_distribution EKF_Camera_Pose::estimate(
     const EKF_Camera_Pose::state_distribution& state_distribution_post_prev, 
-    const Vec6& u, const Mat66& Q,
-    const Vec2& z_meas, const Mat22& R)
+    const Vec6& u, const Vec2& z_meas)
 {
     Vec6 x_post_prev = std::get<0>(state_distribution_post_prev);
     Mat66 P_post_prev = std::get<1>(state_distribution_post_prev);
 
     Vec3 p3D_camera(x_post_prev[0], x_post_prev[1], x_post_prev[2]);
     Mat26 H = compute_H(p3D_camera);
+
+    Mat66 Q = compute_Q();
+    Mat22 R = compute_R();
 
     // prediction
     Vec6 x_prio = F_*x_post_prev + u;
@@ -74,13 +76,13 @@ Mat26 EKF_Camera_Pose::compute_H(const Vec3& p3D_camera)
     switch (camera_->camera_model_)
     {
         case Camera::PINHOLE:
-            H << fx/Z, 0, -(X*fx)/Z2, 0, 0, 0,
-                 0, fy/Z, -(Y*fy)/Z2, 0, 0, 0;
+            H << 0, 0, 0, fx/Z, 0, -(X*fx)/Z2,
+                 0, 0, 0, 0, fy/Z, -(Y*fy)/Z2;
             break;
 
         case Camera::BROWN_CONRADY: // (TODO) implement B-C, for now it is pinhole.
-            H << fx/Z, 0, -(X*fx)/Z2, 0, 0, 0,
-                 0, fy/Z, -(Y*fy)/Z2, 0, 0, 0;
+            H << 0, 0, 0, fx/Z, 0, -(X*fx)/Z2,
+                 0, 0, 0, 0, fy/Z, -(Y*fy)/Z2;
             break;
     }
 
@@ -88,15 +90,19 @@ Mat26 EKF_Camera_Pose::compute_H(const Vec3& p3D_camera)
 }
 
 // ----------------------------------------------------------------------------
-void EKF_Camera_Pose::compute_and_set_Q()
+Mat66 EKF_Camera_Pose::compute_Q()
 {
+    Mat66 Q = Mat66::Identity()*1E0;
 
+    return Q;
 }
 
 // ----------------------------------------------------------------------------
-void EKF_Camera_Pose::compute_and_set_R()
+Mat22 EKF_Camera_Pose::compute_R()
 {
+    Mat22 R = Mat22::Identity()*1E0;
 
+    return R;
 }
 
 } // namespace tello_slam
