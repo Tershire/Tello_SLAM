@@ -108,31 +108,49 @@ bool ArUco_Detector::estimate_poses(std::vector<int>& ids,
     Mat33 R_cm;
     SE3 T_cm;
 
+    int num_iterations = 100;
+    float reprojection_error = 8.0;
+    double confidence = 0.99;
+    cv::Mat inlier_corner_point_indices;
+
+    std::vector<int> inlier_ids;
+        std::vector<std::vector<cv::Point2f>> inlier_p2Dss_pixel;
+
     for (size_t i = 0; i < ids.size(); ++i)
     {
         p2Ds_pixel = p2Dss_pixel[i];
 
         // estimate pose with RANSAC
         cv::solvePnPRansac(p3Ds_marker_, p2Ds_pixel, 
-            cameraMatrix_, distCoeffs_, rvec, tvec, 
-            false, cv::SOLVEPNP_IPPE_SQUARE);
+            cameraMatrix_, distCoeffs_, rvec, tvec, false, num_iterations, 
+            reprojection_error, confidence, inlier_corner_point_indices, cv::SOLVEPNP_IPPE_SQUARE);
+        
+        if (inlier_corner_point_indices.total() == 4)
+        {
+            // convert rotation vector to rotation matrix
+            cv::Rodrigues(rvec, rmat);
 
-        // convert rotation vector to rotation matrix
-        cv::Rodrigues(rvec, rmat);
+            // convert to Eigen
+            R_cm << rmat(0, 0), rmat(0, 1), rmat(0, 2),
+                    rmat(1, 0), rmat(1, 1), rmat(1, 2),
+                    rmat(2, 0), rmat(2, 1), rmat(2, 2);
 
-        // convert to Eigen
-        R_cm << rmat(0, 0), rmat(0, 1), rmat(0, 2),
-                rmat(1, 0), rmat(1, 1), rmat(1, 2),
-                rmat(2, 0), rmat(2, 1), rmat(2, 2);
+            t_cm = Vec3(tvec[0], tvec[1], tvec[2]);
 
-        t_cm = Vec3(tvec[0], tvec[1], tvec[2]);
+            // convert to Sophus
+            Quaternion q_cm(R_cm);
+            T_cm = SE3(q_cm, t_cm); // SE3(SO3(R_cm), t_cm)
 
-        // convert to Sophus
-        Quaternion q_cm(R_cm);
-        T_cm = SE3(q_cm, t_cm); // SE3(SO3(R_cm), t_cm)
-
-        Ts_cm.push_back(T_cm);
+            //
+            Ts_cm.push_back(T_cm);
+            inlier_ids.push_back(ids[i]);
+            inlier_p2Dss_pixel.push_back(p2Dss_pixel[i]);
+        }
     }
+
+    // update
+    ids = inlier_ids;
+    p2Dss_pixel = inlier_p2Dss_pixel;
 
     return true;
 }
