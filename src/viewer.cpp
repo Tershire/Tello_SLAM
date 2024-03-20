@@ -175,7 +175,7 @@ void Viewer::thread_loop()
         // log ================================================================
         if (motion_log_on_ && !do_pause_)
         {
-            Vec3 position = frontend_->get_current_camera_translational_velocity() * 1E2;
+            Vec3 position = frontend_->get_current_camera_position() * 1E2;
             log.Log(position[0], position[1], position[2]);
 
             // Vec3 velocity = frontend_->get_current_camera_translational_velocity();

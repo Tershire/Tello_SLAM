@@ -208,7 +208,7 @@ bool Frontend::track()
     // deduce current instantaneous velocity
     if (motion_log_on_)
     {
-        current_camera_position_ = current_frame_->get_T_cw().translation();
+        current_camera_position_ = current_frame_->get_T_cw().inverse().translation();
 
         double delta_time = (current_frame_->timestamp_ - previous_frame_->timestamp_)*1E-3;
         SE3 T_PrevCurr = T_CurrPrev_.inverse();
@@ -431,9 +431,8 @@ int Frontend::compute_camera_pose()
         }
 
         //
-        SE3 T_cw = current_frame_->get_T_cw();
-        Vec3 p3D_world = T_cw.translation().transpose()*1E2;
-        std::printf("\tcamera position [cm]: (%7.1f, %7.1f, %7.1f)", p3D_world[0], p3D_world[1], p3D_world[2]);
+        Vec3 p3D_world = current_frame_->get_T_cw().inverse().translation();
+        std::printf("\tcamera position [cm]: (%7.1f, %7.1f, %7.1f)", p3D_world[0]*1E2, p3D_world[1]*1E2, p3D_world[2]*1E2);
         std::cout << std::endl;
     }
     else

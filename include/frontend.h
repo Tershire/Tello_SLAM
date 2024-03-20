@@ -54,6 +54,7 @@ public:
     // getter & setter ////////////////////////////////////////////////////////
     // getter =================================================================
     Tracking_Status get_tracking_status() const {return tracking_status_;}
+    Vec3 get_current_camera_position() const {return current_camera_position_;}
     Vec3 get_current_camera_translational_velocity() const {return current_camera_translational_velocity_;}
 
     // setter =================================================================

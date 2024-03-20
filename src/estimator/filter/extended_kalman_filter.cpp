@@ -27,7 +27,7 @@ EKF_Camera_Pose::EKF_Camera_Pose(Camera::Ptr camera)
 
     // observation
     H_;
-};
+}
 
 // member methods /////////////////////////////////////////////////////////////
 EKF_Camera_Pose::state_distribution EKF_Camera_Pose::estimate(
@@ -55,15 +55,46 @@ EKF_Camera_Pose::state_distribution EKF_Camera_Pose::estimate(
 
 // private XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 // member methods /////////////////////////////////////////////////////////////
+Mat23 EKF_Camera_Pose::H(const Vec3& p3D_camera)
+{
+    Mat23 H;
+
+    double X = p3D_camera[0];
+    double Y = p3D_camera[1];
+    double Z = p3D_camera[2];
+
+    double Z2 = Z*Z;
+
+    double fx = camera_->fx_;
+    double fy = camera_->fy_;
+
+    switch (camera_->camera_model_)
+    {
+        case Camera::PINHOLE:
+            H << fx/Z, 0, -(X*fx)/Z2,
+                 0, fy/Z, -(Y*fy)/Z2;
+            break;
+
+        case Camera::BROWN_CONRADY: // (TODO) implement B-C, for now it is pinhole.
+            H << fx/Z, 0, -(X*fx)/Z2,
+                 0, fy/Z, -(Y*fy)/Z2;
+            break;
+    }
+
+    return H;
+}
+
+// ----------------------------------------------------------------------------
 void EKF_Camera_Pose::compute_and_set_Q()
 {
 
-};
+}
 
 // ----------------------------------------------------------------------------
 void EKF_Camera_Pose::compute_and_set_R()
 {
 
-};
+}
 
 } // namespace tello_slam
+

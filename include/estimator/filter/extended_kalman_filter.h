@@ -69,6 +69,11 @@ private:
 
     // member methods /////////////////////////////////////////////////////////
     /**
+     * 
+     */
+    Mat23 H(const Vec3& p3D_camera);
+
+    /**
      *
      */
     void compute_and_set_Q();
