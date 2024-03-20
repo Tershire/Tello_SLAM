@@ -25,6 +25,9 @@ namespace tello_slam
  * EKF for camera pose: T_cw
  * x <- F*x + u + w
  * y <- H*x + v
+ * 
+ * state: x is se3 <--- SE3: T_wc
+ * observation: z is projected pixel point in image of the upper left marker corner point.
 */
 class EKF_Camera_Pose
 {
@@ -55,7 +58,7 @@ public:
      */
     state_distribution estimate(const state_distribution& state_distribution_post_prev, 
         const Vec6& u, const Mat66& Q,
-        const Vec6& z_meas, const Mat66& R);
+        const Vec2& z_meas, const Mat22& R);
 
 private:
     // member data ////////////////////////////////////////////////////////////
@@ -63,7 +66,7 @@ private:
     Mat66 F_; // Jacobian (state)
 
     // observation
-    Mat66 H_; // Jacobian
+    // Mat66 H_; // Jacobian
     
     Camera::Ptr camera_ = nullptr;
 
@@ -71,7 +74,7 @@ private:
     /**
      * 
      */
-    Mat23 H(const Vec3& p3D_camera);
+    Mat26 compute_H(const Vec3& p3D_camera);
 
     /**
      *
