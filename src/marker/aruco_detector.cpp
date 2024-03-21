@@ -127,6 +127,10 @@ bool ArUco_Detector::estimate_poses(std::vector<int>& ids,
         
         if (inlier_corner_point_indices.total() == 4)
         {
+            // refine pose iteratively using Levenberg-Marquardt method
+            cv::solvePnPRefineLM(p3Ds_marker_, p2Ds_pixel, 
+                cameraMatrix_, distCoeffs_, rvec, tvec);
+
             // convert rotation vector to rotation matrix
             cv::Rodrigues(rvec, rmat);
 

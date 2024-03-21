@@ -24,6 +24,7 @@
 #include "frontend.h"
 #include "map.h"
 #include "viewer.h"
+#include "extended_kalman_filter.h"
 
 
 namespace tello_slam
@@ -409,6 +410,8 @@ int Frontend::compute_camera_pose()
     std::vector<SE3> Ts_cw;
     for (auto& aruco_feature : current_frame_->aruco_features_)
     {
+        // if a newly detected marker is already registered to the map,
+        // deduce the current camera pose and collect these poses for all detected markers.
         if (registered_aruco_landmarks.find(aruco_feature->aruco_id_) != registered_aruco_landmarks.end())
         {
             T_wm = registered_aruco_landmarks[aruco_feature->aruco_id_]->T_wm_;
@@ -422,6 +425,7 @@ int Frontend::compute_camera_pose()
     {
         if (Ts_cw.size() > 1)
         {
+            // if the collection has at least one entry, take the average and set it as the current camera pose.
             Sophus::enable_if_t<true, Sophus::optional<Sophus::SE3<double>>> mean_T_cw = Sophus::average(Ts_cw);
             current_frame_->set_T_cw(SE3(mean_T_cw->matrix()));
         }
