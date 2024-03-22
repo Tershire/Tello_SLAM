@@ -155,7 +155,12 @@ private:
     /**
      * 
      */
-    int compute_camera_pose();
+    int estimate_camera_pose();
+
+    /**
+     * 
+     */
+    std::pair<Mat66, Mat22> propose_Q_and_R(const double& v);
 
     /**
      * 

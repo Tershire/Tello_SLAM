@@ -25,6 +25,7 @@
 #include "map.h"
 #include "viewer.h"
 #include "extended_kalman_filter.h"
+#include "conversion_toolbox.h"
 
 
 namespace tello_slam
@@ -186,7 +187,7 @@ bool Frontend::track()
     }
 
     // estimate | compute current camera pose
-    int success = compute_camera_pose();
+    int success = estimate_camera_pose();
     if (!success)
     {
         tracking_status_ = Tracking_Status::LOST;
@@ -199,6 +200,8 @@ bool Frontend::track()
 
     // compute pose difference
     T_CurrPrev_ = current_frame_->get_T_cw() * previous_frame_->get_T_cw().inverse();
+    SE3 T_PrevCurr = T_CurrPrev_.inverse();
+    current_frame_->T_PrevCurr_ = T_PrevCurr;
 
     //
     // for (auto& active_aruco_landmark : map_->get_active_aruco_landmarks())
@@ -212,7 +215,6 @@ bool Frontend::track()
         current_camera_position_ = current_frame_->get_T_cw().inverse().translation();
 
         double delta_time = (current_frame_->timestamp_ - previous_frame_->timestamp_)*1E-3;
-        SE3 T_PrevCurr = T_CurrPrev_.inverse();
 
         current_camera_translational_velocity_ = T_PrevCurr.translation() / delta_time;
         // std::cout << "current_camera_translational_velocity_: " << current_camera_translational_velocity_.transpose() << std::endl;
@@ -402,11 +404,11 @@ int Frontend::compute_aruco_poses()
 }
 
 // ----------------------------------------------------------------------------
-int Frontend::compute_camera_pose()
+int Frontend::estimate_camera_pose()
 {
     Map::aruco_landmarks_type registered_aruco_landmarks = map_->get_all_aruco_landmarks();
 
-    SE3 T_wm, T_cm;
+    SE3 T_wm, T_cm, T_cw;
     std::vector<SE3> Ts_cw;
     for (auto& aruco_feature : current_frame_->aruco_features_)
     {
@@ -414,10 +416,29 @@ int Frontend::compute_camera_pose()
         // deduce the current camera pose and collect these poses for all detected markers.
         if (registered_aruco_landmarks.find(aruco_feature->aruco_id_) != registered_aruco_landmarks.end())
         {
-            T_wm = registered_aruco_landmarks[aruco_feature->aruco_id_]->T_wm_;
-            T_cm = aruco_feature->T_cm_;
+            ArUco_Landmark::Ptr registered_aruco_landmark = registered_aruco_landmarks[aruco_feature->aruco_id_];
 
-            Ts_cw.push_back(T_cm * T_wm.inverse());
+            T_wm = registered_aruco_landmark->T_wm_;
+            T_cm = aruco_feature->T_cm_;
+            
+            // calculate pose difference
+            SE3 T_CurrPrev = T_cm * registered_aruco_landmark->observations_.back().lock()->T_cm_.inverse();
+            SE3 T_PrevCurr = T_CurrPrev.inverse();
+            double delta_time = (current_frame_->timestamp_ - previous_frame_->timestamp_)*1E-3;
+            double v = T_PrevCurr.translation().norm() / delta_time;
+
+            // EKF: based on the translation difference, raise question on the T_cm observation.
+            std::pair<Mat66, Mat22> Q_and_R = propose_Q_and_R(v);
+
+            // EKF_Camera_Pose::state_distribution_post_prev = std::make_pair();
+            // Vec3 delta_r, delta_t;
+            // T_to_r_and_t(previous_frame_->T_PrevCurr_, delta_r, delta_t);
+            // Vec6 u << delta_r, delta_t;
+            // EKF_Camera_Pose::state_distribution estimate(state_distribution_post_prev, u, z_meas, Q, R);
+
+            T_cw = T_cm * T_wm.inverse();
+
+            Ts_cw.push_back(T_cw);
         }
     }
 
@@ -445,6 +466,20 @@ int Frontend::compute_camera_pose()
     }
 
     return 0;
+}
+
+// ----------------------------------------------------------------------------
+std::pair<Mat66, Mat22> Frontend::propose_Q_and_R(const double& v)
+{
+    double mu = 0; // (TODO) can we say this assumption is ok ?
+    double sigma = 1.5;
+
+    double p = 1/(sigma*std::sqrt(2*M_PI))*std::exp(-0.5*((v - mu)/sigma)*((v - mu)/sigma));
+
+    Mat66 Q = Mat66::Identity()*(1 - p);
+    Mat22 R = Mat22::Identity()*1/p;
+
+    return std::make_pair(Q, R);
 }
 
 } // namespace tello_slam

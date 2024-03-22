@@ -23,7 +23,7 @@ namespace tello_slam
 {
 
 /**
- * conversion from r_and_t to T
+ * conversion from rvec and tvec to T
  */
 inline SE3 rvec_and_tvec_to_T(const cv::Vec3d& rvec, const cv::Vec3d& tvec)
 {
@@ -43,7 +43,7 @@ inline SE3 rvec_and_tvec_to_T(const cv::Vec3d& rvec, const cv::Vec3d& tvec)
 }
 
 /**
- * conversion from T to r_and_t
+ * conversion from T to rvec and tvec
  */
 inline void T_to_rvec_and_tvec(const SE3& T, cv::Vec3d& rvec, cv::Vec3d& tvec)
 {
@@ -68,6 +68,18 @@ inline void T_to_rvec_and_tvec(const SE3& T, cv::Vec3d& rvec, cv::Vec3d& tvec)
     tvec(0) = t(0);
     tvec(1) = t(1);
     tvec(2) = t(2);
+}
+
+/**
+ * conversion from T to r and t
+ */
+inline void T_to_r_and_t(const SE3& T, Vec3& r, Vec3& t)
+{
+    SO3 R;
+    R = T.so3();
+    r = R.log();
+
+    t = T.translation();
 }
 
 } // namespace tello_slam
