@@ -59,13 +59,21 @@ public:
     state_distribution estimate(const state_distribution& state_distribution_post_prev, 
         const Vec6& u, const Vec2& z_meas);
 
+    /**
+     * estimate
+     */
+    state_distribution estimate(const state_distribution& state_distribution_post_prev, 
+        const Vec6& u, const Vec2& z_meas, Mat66& Q, Mat22& R);
+
 private:
     // member data ////////////////////////////////////////////////////////////
     // motion
     Mat66 F_; // Jacobian (state)
+    Mat66 default_Q_;
 
     // observation
-    // Mat66 H_; // Jacobian
+    // Mat26 H_; // Jacobian
+    Mat22 default_R_;
     
     Camera::Ptr camera_ = nullptr;
 
@@ -84,6 +92,16 @@ private:
      *
      */
     Mat22 compute_R();
+
+    /**
+     * 
+     */
+    double compute_Q_factor();
+
+    /**
+     * 
+     */
+    double compute_R_factor();
 };
 
 } // namespace tello_slam

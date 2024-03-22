@@ -24,9 +24,11 @@ EKF_Camera_Pose::EKF_Camera_Pose(Camera::Ptr camera)
 {
     // motion
     F_ = Mat66::Identity();
+    default_Q_ = Mat66::Identity();
 
     // observation
     // H_;
+    default_R_ = Mat22::Identity();
 }
 
 // member methods /////////////////////////////////////////////////////////////
@@ -42,6 +44,35 @@ EKF_Camera_Pose::state_distribution EKF_Camera_Pose::estimate(
 
     Mat66 Q = compute_Q();
     Mat22 R = compute_R();
+
+    // prediction
+    Vec6 x_prio = F_*x_post_prev + u;
+    Mat66 P_prio = F_*P_post_prev*F_.transpose() + Q;
+
+    // Kalman gain
+    Mat22 S = H*P_prio*H.transpose() + R;
+    Mat62 K = P_prio*H.transpose()*S.inverse();
+
+    // update
+    Vec6 x_post = x_prio + K*(z_meas - H*x_prio);
+    Mat66 P_post = (Mat66::Identity() - K*H)*P_prio;
+
+    return std::make_pair(x_post, P_post);
+}
+
+// ----------------------------------------------------------------------------
+EKF_Camera_Pose::state_distribution EKF_Camera_Pose::estimate(
+    const EKF_Camera_Pose::state_distribution& state_distribution_post_prev, 
+    const Vec6& u, const Vec2& z_meas, Mat66& Q, Mat22& R)
+{
+    Vec6 x_post_prev = std::get<0>(state_distribution_post_prev);
+    Mat66 P_post_prev = std::get<1>(state_distribution_post_prev);
+
+    Vec3 p3D_camera(x_post_prev[0], x_post_prev[1], x_post_prev[2]);
+    Mat26 H = compute_H(p3D_camera);
+
+    Q *= compute_Q_factor();
+    R *= compute_R_factor();
 
     // prediction
     Vec6 x_prio = F_*x_post_prev + u;
@@ -103,6 +134,18 @@ Mat22 EKF_Camera_Pose::compute_R()
     Mat22 R = Mat22::Identity()*1E0;
 
     return R;
+}
+
+// ----------------------------------------------------------------------------
+double EKF_Camera_Pose::compute_Q_factor()
+{
+
+}
+
+// ----------------------------------------------------------------------------
+double EKF_Camera_Pose::compute_R_factor()
+{
+    
 }
 
 } // namespace tello_slam
