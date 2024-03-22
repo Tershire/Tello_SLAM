@@ -348,29 +348,28 @@ void Viewer::draw_trail(Frame::Ptr frame, const float* COLOR)
     glColor3f(COLOR[0], COLOR[1], COLOR[2]);
 
     // line
-    glLineWidth(1);
+    // glLineWidth(1);
 
-    glBegin(GL_LINES);
-    for (int i = 1; i < trail_points_.size(); ++i)
-    {
-        Vec3 current_position = trail_points_[i];
-        Vec3 previous_position = trail_points_[i - 1];
-
-        glVertex3d(current_position[0], current_position[1], current_position[2]);
-        glVertex3d(previous_position[0], previous_position[1], previous_position[2]);
-    }
-    glEnd();
-
-    // point
-    // glPointSize(1);
-
-    // glBegin(GL_POINTS);
-    // for (auto& position : trail_points_)
+    // glBegin(GL_LINES);
+    // for (int i = 1; i < trail_points_.size(); ++i)
     // {
-    //     glColor3f(COLOR[0], COLOR[1], COLOR[2]);
-    //     glVertex3d(position[0], position[1], position[2]);
+    //     Vec3 current_position = trail_points_[i];
+    //     Vec3 previous_position = trail_points_[i - 1];
+
+    //     glVertex3d(current_position[0], current_position[1], current_position[2]);
+    //     glVertex3d(previous_position[0], previous_position[1], previous_position[2]);
     // }
     // glEnd();
+
+    // point
+    glPointSize(1);
+
+    glBegin(GL_POINTS);
+    for (auto& position : trail_points_)
+    {
+        glVertex3d(position[0], position[1], position[2]);
+    }
+    glEnd();
 }
 
 // ----------------------------------------------------------------------------
