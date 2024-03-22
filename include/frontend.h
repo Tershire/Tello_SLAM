@@ -22,6 +22,7 @@
 #include "frame.h"
 #include "map.h"
 #include "aruco_detector.h"
+#include "extended_kalman_filter.h"
 
 
 namespace tello_slam
@@ -63,6 +64,7 @@ public:
     void set_backend(std::shared_ptr<Backend> backend) {backend_ = backend;}
     void set_viewer(std::shared_ptr<Viewer> viewer) {viewer_ = viewer;}
     void set_aruco_detector(std::shared_ptr<ArUco_Detector> aruco_detector) {aruco_detector_ = aruco_detector;}
+    void set_ekf_camera_pose(std::shared_ptr<EKF_Camera_Pose> ekf_camera_pose) {ekf_camera_pose_ =ekf_camera_pose;}
     
     // member methods /////////////////////////////////////////////////////////
     /**
@@ -82,6 +84,7 @@ private:
     Map::Ptr map_ = nullptr;
     std::shared_ptr<Backend> backend_ = nullptr;
     std::shared_ptr<Viewer> viewer_ = nullptr;
+    std::shared_ptr<EKF_Camera_Pose> ekf_camera_pose_ = nullptr;
 
     SE3 T_CurrPrev_; // The relative motion between the current frame and the previous frame is used to estimate the initial value of the pose of the current frame
 

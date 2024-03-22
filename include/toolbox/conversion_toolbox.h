@@ -82,6 +82,42 @@ inline void T_to_r_and_t(const SE3& T, Vec3& r, Vec3& t)
     t = T.translation();
 }
 
+/**
+ * conversion from T to state so3_t
+ */
+inline Vec6 T_to_so3_t(const SE3& T)
+{
+    SO3 R;
+    Vec3 r, t;
+    R = T.so3();
+    r = R.log();
+
+    t = T.translation();
+
+    Vec6 so3_t;
+    so3_t << r, t;
+
+    return so3_t;
+}
+
+/**
+ * conversion from state so3_t to T 
+ */
+inline SE3 so3_t_to_T(const Vec6& so3_t)
+{
+    SE3 T;
+    SO3 R;
+    Vec3 r, t;
+    r = so3_t.head(3);
+    t = so3_t.tail(3);
+
+    R.exp(r);
+
+    T = SE3(R, t);
+
+    return T;
+}
+
 } // namespace tello_slam
 
 #endif // TELLOSLAM_CONVERSIONTOOLBOX_H

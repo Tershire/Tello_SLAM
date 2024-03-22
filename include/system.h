@@ -26,6 +26,7 @@
 #include "imu/imu_reader.h"
 #include "supervisor.h"
 #include "door/door_detector.h"
+#include "extended_kalman_filter.h"
 
 
 namespace tello_slam
@@ -110,6 +111,7 @@ private:
     Viewer::Ptr viewer_ = nullptr;
     
     ArUco_Detector::Ptr aruco_detector_ = nullptr;
+    EKF_Camera_Pose::Ptr ekf_camera_pose_ = nullptr;
     IMU_Reader::Ptr imu_reader_ = nullptr;
     Door_Detector::Ptr door_detector_ = nullptr;
 

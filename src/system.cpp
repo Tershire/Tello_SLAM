@@ -98,6 +98,9 @@ bool System::initialize()
         target_id, predifined_dictionary_name_, marker_length_, mono_camera_);
     aruco_detector_->set_verbose(verbose);
 
+    // EKF --------------------------------------------------------------------
+    ekf_camera_pose_ = std::make_shared<EKF_Camera_Pose>(mono_camera_);
+
     // door detector ----------------------------------------------------------
     door_detector_ = std::make_shared<Door_Detector>(mono_camera_);
     door_detector_->set_is_for_tracking_only_one(false);
@@ -124,6 +127,7 @@ bool System::initialize()
     frontend_->set_viewer(viewer_);
     frontend_->set_camera(mono_camera_);
     frontend_->set_aruco_detector(aruco_detector_);
+    frontend_->set_ekf_camera_pose(ekf_camera_pose_);
 
     // backend_->set_map(map_);
     // backend_->set_camera(mono_camera_);

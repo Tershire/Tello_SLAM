@@ -139,13 +139,13 @@ Mat22 EKF_Camera_Pose::compute_R()
 // ----------------------------------------------------------------------------
 double EKF_Camera_Pose::compute_Q_factor()
 {
-
+    return 1;
 }
 
 // ----------------------------------------------------------------------------
 double EKF_Camera_Pose::compute_R_factor()
 {
-    
+    return 1;
 }
 
 } // namespace tello_slam
