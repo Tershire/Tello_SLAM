@@ -39,6 +39,12 @@ bool System::initialize()
     else
         verbose_ = true;
 
+    int use_EKF = Config::read<int>("use_EKF");
+    if (use_EKF == 0)
+        use_EKF_ = false;
+    else
+        use_EKF_ = true;
+
     std::string input_mode = Config::read<std::string>("input_mode");
     if (input_mode == "tello")
         input_mode_ = Input_Mode::TELLO;
@@ -128,6 +134,7 @@ bool System::initialize()
     frontend_->set_camera(mono_camera_);
     frontend_->set_aruco_detector(aruco_detector_);
     frontend_->set_ekf_camera_pose(ekf_camera_pose_);
+    frontend_->use_EKF_ = use_EKF_;
 
     // backend_->set_map(map_);
     // backend_->set_camera(mono_camera_);

@@ -26,7 +26,7 @@ namespace tello_slam
  * x <- F*x + u + w
  * y <- H*x + v
  * 
- * state: x is se3 <--- SE3: T_cm
+ * state: x is (t, q) for T_cm
  * observation: z is projected pixel point in image of the upper left marker corner point.
 */
 class EKF_Camera_Pose
@@ -35,7 +35,7 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
     typedef std::shared_ptr<EKF_Camera_Pose> Ptr;
 
-    typedef std::pair<Vec6, Mat66> state_distribution;
+    typedef std::pair<Vec7, Mat77> state_distribution;
 
     // constructor & destructor ///////////////////////////////////////////////
     EKF_Camera_Pose() {};
@@ -57,22 +57,22 @@ public:
      * estimate
      */
     state_distribution estimate(const state_distribution& state_distribution_post_prev, 
-        const Vec6& u, const Vec2& z_meas);
+        const Vec7& u, const Vec2& z_meas);
 
     /**
      * estimate
      */
     state_distribution estimate(const state_distribution& state_distribution_post_prev, 
-        const Vec6& u, const Vec2& z_meas, Mat66& Q, Mat22& R);
+        const Vec7& delta_x, const Vec2& z_meas, Mat77& Q, Mat22& R);
 
 private:
     // member data ////////////////////////////////////////////////////////////
     // motion
-    Mat66 F_; // Jacobian (state)
-    Mat66 default_Q_;
+    Mat77 F_; // Jacobian (state)
+    Mat77 default_Q_;
 
     // observation
-    // Mat26 H_; // Jacobian
+    // Mat27 H_; // Jacobian
     Mat22 default_R_;
     
     Camera::Ptr camera_ = nullptr;
@@ -81,12 +81,17 @@ private:
     /**
      * 
      */
-    Mat26 compute_H(const Vec3& p3D_camera);
+    Mat77 compute_F(const Vec7& dx);
+
+    /**
+     * 
+     */
+    Mat27 compute_H(const Vec3& p3D_camera);
 
     /**
      *
      */
-    Mat66 compute_Q();
+    Mat77 compute_Q();
 
     /**
      *

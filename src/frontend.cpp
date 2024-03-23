@@ -424,40 +424,54 @@ int Frontend::estimate_camera_pose()
             // ----------------------------------------------------------------
             // EKF: based on the translation difference, raise question on the T_cm observation.
 
-            // calculate pose difference
-            SE3 previous_T_cm = previous_frame_->T_cw_ * T_wm;
-            SE3 T_CurrPrev = T_cm * previous_T_cm.inverse();
-            SE3 T_PrevCurr = T_CurrPrev.inverse();
-            double delta_time = (current_frame_->timestamp_ - previous_frame_->timestamp_)*1E-3;
-            double v = T_PrevCurr.translation().norm() / delta_time;
-
-            // prepare inputs to EKF
-            std::pair<Mat66, Mat22> Q_and_R = propose_Q_and_R(v);
-
-            EKF_Camera_Pose::state_distribution state_distribution_post_prev = 
-                std::make_pair(T_to_so3_t(previous_T_cm), Mat66::Identity());
-
-            Vec6 delta_x = T_to_so3_t(previous_frame_->T_PrevCurr_);
-            Vec6 u = delta_x / delta_time;
-            
-            std::vector<int> aruco_ids = current_frame_->aruco_ids_;
-            auto iterator = std::find(aruco_ids.begin(), aruco_ids.end(), aruco_feature->aruco_id_);
-            int index = iterator - aruco_ids.begin();
-            std::vector<cv::Point2f> corner_keypoints = current_frame_->corner_keypointss_[index];
-            cv::Point2f keypoints_sum;
-            for (auto& corner_keypoint : corner_keypoints)
+            if (use_EKF_)
             {
-                keypoints_sum += corner_keypoint;
+                // calculate pose difference
+                SE3 previous_T_cm = previous_frame_->T_cw_ * T_wm;
+                SE3 T_CurrPrev = T_cm * previous_T_cm.inverse();
+                SE3 T_PrevCurr = T_CurrPrev.inverse();
+                double delta_time = (current_frame_->timestamp_ - previous_frame_->timestamp_)*1E-3;
+                double v = T_PrevCurr.translation().norm() / delta_time;
+
+                // prepare inputs to EKF
+                std::pair<Mat77, Mat22> Q_and_R = propose_Q_and_R(v);
+
+                //
+                // std::cout << "Q:\n" << std::get<0>(Q_and_R) << std::endl;
+                std::cout << "R:\n" << std::get<1>(Q_and_R) << std::endl;
+
+                EKF_Camera_Pose::state_distribution state_distribution_post_prev = 
+                    std::make_pair(T_to_t_q(previous_T_cm), Mat77::Identity());
+
+                Vec7 delta_x = T_to_t_q(previous_frame_->T_PrevCurr_);
+                
+                std::vector<int> aruco_ids = current_frame_->aruco_ids_;
+                auto iterator = std::find(aruco_ids.begin(), aruco_ids.end(), aruco_feature->aruco_id_);
+                int index = iterator - aruco_ids.begin();
+                std::vector<cv::Point2f> corner_keypoints = current_frame_->corner_keypointss_[index];
+                cv::Point2f keypoints_sum;
+                for (auto& corner_keypoint : corner_keypoints)
+                {
+                    keypoints_sum += corner_keypoint;
+                }
+                Vec2 z_meas = Vec2(keypoints_sum.x, keypoints_sum.y) / corner_keypoints.size();
+
+                //
+                // std::cout << "aruco_feature->aruco_id_: " << aruco_feature->aruco_id_ << std::endl;
+                // cv::Mat image_out;
+                // cv::cvtColor(current_frame_->image_, image_out, cv::COLOR_GRAY2BGR);
+                // cv::circle(image_out, cv::Point2f(z_meas[0], z_meas[1]), 3, cv::Scalar(0, 255, 0));
+                // cv::imshow("EKF Projection", image_out);
+                // cv::waitKey(10);
+
+                // run EKF
+                EKF_Camera_Pose::state_distribution state_distribution = 
+                    ekf_camera_pose_->estimate(state_distribution_post_prev, delta_x, z_meas, std::get<0>(Q_and_R), std::get<1>(Q_and_R));
+
+                Vec7 x = std::get<0>(state_distribution);
+                T_cm = t_q_to_T(x);
+                // Mat77 P = std::get<1>(state_distribution);
             }
-            Vec2 z_meas = Vec2(keypoints_sum.x, keypoints_sum.y) / corner_keypoints.size();
-
-            // run EKF
-            EKF_Camera_Pose::state_distribution state_distribution = 
-                ekf_camera_pose_->estimate(state_distribution_post_prev, u, z_meas, std::get<0>(Q_and_R), std::get<1>(Q_and_R));
-
-            Vec6 x = std::get<0>(state_distribution);
-            // T_cm = so3_t_to_T(x);
-            // Mat66 P = std::get<1>(state_distribution);
             // ----------------------------------------------------------------
 
             T_cw = T_cm * T_wm.inverse();
@@ -493,15 +507,15 @@ int Frontend::estimate_camera_pose()
 }
 
 // ----------------------------------------------------------------------------
-std::pair<Mat66, Mat22> Frontend::propose_Q_and_R(const double& v)
+std::pair<Mat77, Mat22> Frontend::propose_Q_and_R(const double& v)
 {
     double mu = 0; // (TODO) can we say this assumption is ok ?
     double sigma = 1.5;
 
     double p = 1/(sigma*std::sqrt(2*M_PI))*std::exp(-0.5*((v - mu)/sigma)*((v - mu)/sigma));
 
-    Mat66 Q = Mat66::Identity();
-    Mat22 R = Mat22::Identity()*1/p;
+    Mat77 Q = Mat77::Identity();
+    Mat22 R = Mat22::Identity()*10*1/(10*(std::tanh(3.6*p) + 0.1));
 
     return std::make_pair(Q, R);
 }

@@ -49,6 +49,9 @@ public:
         LOST
     };
 
+    // member data ////////////////////////////////////////////////////////////
+    bool use_EKF_;
+
     // constructor & destructor ///////////////////////////////////////////////
     Frontend();
 
@@ -163,7 +166,7 @@ private:
     /**
      * 
      */
-    std::pair<Mat66, Mat22> propose_Q_and_R(const double& v);
+    std::pair<Mat77, Mat22> propose_Q_and_R(const double& v);
 
     /**
      * 

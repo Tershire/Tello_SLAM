@@ -52,6 +52,7 @@ public:
     // member data ////////////////////////////////////////////////////////////
     Input_Mode input_mode_;
     bool verbose_;
+    bool use_EKF_;
 
     // constructor & destructor ///////////////////////////////////////////////
     System(const std::string& configuration_file_path);

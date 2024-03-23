@@ -118,6 +118,34 @@ inline SE3 so3_t_to_T(const Vec6& so3_t)
     return T;
 }
 
+/**
+ * conversion from T to state t_q
+ */
+inline Vec7 T_to_t_q(const SE3& T)
+{
+    Vec3 t = T.translation();
+    Eigen::Quaterniond q = T.unit_quaternion();
+
+    Vec7 t_q;
+    t_q << t, q.coeffs();
+
+    return t_q;
+}
+
+/**
+ * conversion from state so3_t to T 
+ */
+inline SE3 t_q_to_T(const Vec7& t_q)
+{
+    Vec3 t = t_q.head(3);
+    Vec4 q_coeffs = t_q.tail(4);
+    Eigen::Quaterniond q(q_coeffs);
+
+    SE3 T = SE3(q, t);
+
+    return T;
+}
+
 } // namespace tello_slam
 
 #endif // TELLOSLAM_CONVERSIONTOOLBOX_H
