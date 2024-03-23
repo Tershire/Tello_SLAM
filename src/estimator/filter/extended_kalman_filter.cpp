@@ -89,7 +89,7 @@ EKF_Camera_Pose::state_distribution EKF_Camera_Pose::estimate(
     Mat72 K = P_prio*H.transpose()*S.inverse();
 
     // update
-    Vec7 x_post = x_prio + K*(z_meas - H*x_prio);
+    Vec7 x_post = x_prio + K*(z_meas - h_pinhole(x_prio));
     Mat77 P_post = (Mat77::Identity() - K*H)*P_prio;
 
     return std::make_pair(x_post, P_post);
@@ -99,18 +99,12 @@ EKF_Camera_Pose::state_distribution EKF_Camera_Pose::estimate(
 // member methods /////////////////////////////////////////////////////////////
 Mat77 EKF_Camera_Pose::compute_F(const Vec7& delta_x)
 {
-    //
-    std::cout << "compute_F: <0>" << std::endl;
-
     Vec4 delta_q = delta_x.tail(4);
 
     Mat77 F;
 
     F << Mat33::Identity(), Mat34::Zero(),
         Mat43::Zero(), left_quaternion_multiplication_matrix(delta_q);
-
-    //
-    std::cout << "compute_F: <e>" << std::endl;
 
     return F;
 }
@@ -171,6 +165,20 @@ double EKF_Camera_Pose::compute_Q_factor()
 double EKF_Camera_Pose::compute_R_factor()
 {
     return 1;
+}
+
+// ----------------------------------------------------------------------------
+Vec2 EKF_Camera_Pose::h_pinhole(const Vec7& x_prio)
+{
+    Vec3 p3D_camera = x_prio.head(3);
+
+    double fx = camera_->fx_;
+    double fy = camera_->fy_;
+    double cx = camera_->cx_;
+    double cy = camera_->cy_;
+
+    return Vec2(fx * p3D_camera[0] / p3D_camera[2] + cx,
+                fy * p3D_camera[1] / p3D_camera[2] + cy);
 }
 
 } // namespace tello_slam

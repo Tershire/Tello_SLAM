@@ -431,6 +431,9 @@ int Frontend::estimate_camera_pose()
 
             if (use_EKF_)
             {
+                //
+                std::cout << "ArUco ID: " << aruco_feature->aruco_id_ << std::endl;
+
                 // calculate pose difference
                 SE3 previous_T_cm = previous_frame_->T_cw_ * T_wm;
                 SE3 T_CurrPrev = T_cm * previous_T_cm.inverse();
@@ -442,22 +445,16 @@ int Frontend::estimate_camera_pose()
                 std::pair<Mat77, Mat22> Q_and_R = propose_Q_and_R(v);
 
                 //
-                // std::cout << "Q:\n" << std::get<0>(Q_and_R) << std::endl;
                 std::cout << "R:\n" << std::get<1>(Q_and_R) << std::endl;
 
+                Vec7 x_post_prev = T_to_t_q(previous_T_cm);
                 EKF_Camera_Pose::state_distribution state_distribution_post_prev = 
-                    std::make_pair(T_to_t_q(previous_T_cm), Mat77::Identity());
+                    std::make_pair(x_post_prev, Mat77::Identity());
 
                 Vec7 delta_x = T_to_t_q(previous_frame_->T_PrevCurr_);
 
                 //
                 std::cout << "cm delta_x: " << delta_x.transpose() << std::endl;
-                // for (;;)
-                // {
-                //     if (cv::waitKey(10) == 27) {
-                //         break;
-                //     }
-                // }
                 
                 std::vector<int> aruco_ids = current_frame_->aruco_ids_;
                 auto iterator = std::find(aruco_ids.begin(), aruco_ids.end(), aruco_feature->aruco_id_);
@@ -483,6 +480,10 @@ int Frontend::estimate_camera_pose()
                     ekf_camera_pose_->estimate(state_distribution_post_prev, delta_x, z_meas, std::get<0>(Q_and_R), std::get<1>(Q_and_R));
 
                 Vec7 x = std::get<0>(state_distribution);
+
+                //
+                std::cout << "post t_cm [cm]: " << x.head(3).transpose()*1E2 << std::endl;
+
                 T_cm = t_q_to_T(x);
                 // Mat77 P = std::get<1>(state_distribution);
             }

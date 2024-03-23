@@ -107,6 +107,11 @@ private:
      * 
      */
     double compute_R_factor();
+
+    /**
+     * 
+     */
+    Vec2 h_pinhole(const Vec7& x_prio);
 };
 
 } // namespace tello_slam
