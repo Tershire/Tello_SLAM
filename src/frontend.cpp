@@ -204,6 +204,11 @@ bool Frontend::track()
     current_frame_->T_PrevCurr_ = T_PrevCurr;
 
     //
+    // std::cout << "T_CurrPrev_: \n" << T_CurrPrev_.matrix() << std::endl;
+    Vec7 delta_x = T_to_t_q(T_CurrPrev_);
+    std::cout << "wc delta_x: " << delta_x.transpose() << std::endl;
+
+    //
     // for (auto& active_aruco_landmark : map_->get_active_aruco_landmarks())
     // {
     //     std::cout << "#obsv.s [ID " << active_aruco_landmark.first << "]: " << active_aruco_landmark.second->num_observations_ << std::endl;
@@ -444,6 +449,15 @@ int Frontend::estimate_camera_pose()
                     std::make_pair(T_to_t_q(previous_T_cm), Mat77::Identity());
 
                 Vec7 delta_x = T_to_t_q(previous_frame_->T_PrevCurr_);
+
+                //
+                std::cout << "cm delta_x: " << delta_x.transpose() << std::endl;
+                // for (;;)
+                // {
+                //     if (cv::waitKey(10) == 27) {
+                //         break;
+                //     }
+                // }
                 
                 std::vector<int> aruco_ids = current_frame_->aruco_ids_;
                 auto iterator = std::find(aruco_ids.begin(), aruco_ids.end(), aruco_feature->aruco_id_);

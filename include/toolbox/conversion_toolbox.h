@@ -119,7 +119,7 @@ inline SE3 so3_t_to_T(const Vec6& so3_t)
 }
 
 /**
- * conversion from T to state t_q
+ * conversion from T to state t_q: (t_x, t_y, t_z, q_x, q_y, q_z, q_w)
  */
 inline Vec7 T_to_t_q(const SE3& T)
 {
@@ -133,7 +133,7 @@ inline Vec7 T_to_t_q(const SE3& T)
 }
 
 /**
- * conversion from state so3_t to T 
+ * conversion from state so3_t to T
  */
 inline SE3 t_q_to_T(const Vec7& t_q)
 {

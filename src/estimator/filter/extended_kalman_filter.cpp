@@ -12,6 +12,7 @@
 
 
 #include "extended_kalman_filter.h"
+#include "math_toolbox.h"
 
 
 namespace tello_slam
@@ -98,15 +99,18 @@ EKF_Camera_Pose::state_distribution EKF_Camera_Pose::estimate(
 // member methods /////////////////////////////////////////////////////////////
 Mat77 EKF_Camera_Pose::compute_F(const Vec7& delta_x)
 {
-    // Vec3 dt = delta_x.head(3);
-    Vec4 delta_q = delta_x.tail(4);
+    //
+    std::cout << "compute_F: <0>" << std::endl;
 
-    Mat44 Delta_q = delta_q.asDiagonal();
+    Vec4 delta_q = delta_x.tail(4);
 
     Mat77 F;
 
     F << Mat33::Identity(), Mat34::Zero(),
-        Mat43::Zero(), Delta_q;
+        Mat43::Zero(), left_quaternion_multiplication_matrix(delta_q);
+
+    //
+    std::cout << "compute_F: <e>" << std::endl;
 
     return F;
 }
@@ -160,7 +164,7 @@ Mat22 EKF_Camera_Pose::compute_R()
 // ----------------------------------------------------------------------------
 double EKF_Camera_Pose::compute_Q_factor()
 {
-    return 1;
+    return 1E1;
 }
 
 // ----------------------------------------------------------------------------
